@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>Results of searching</title>
+</head>
+<body>
+<div th:if="${books.size() == 0}">
+  <p>NO BOOKS FOUND</p>
+  <br>
+  <hr/>
+  <a th:href="@{/books/search}">TRY AGAIN</a>
+</div>
+<div th:if="${books.size() > 0}">
+<h1>Results:</h1>
+<table>
+  <tr>
+    <th>Name of the book</th>
+    <th>Author</th>
+    <th>Year</th>
+  </tr>
+  <tr th:each="book : ${books}">
+    <td th:text="${book.getName()}"></td>
+    <td th:text="${book.getAuthor()}"></td>
+    <td th:text="${book.year}"></td>
+    <td>
+    <div th:if="${book.getPerson() != null}">
+      <p>    -   This book is occupied by <span th:text="${book.getPerson().getFullName()}"></span></p>
+    </div>
+
+    <div th:if="${book.getPerson() == null}">
+      <p th:text="'  - This book is free'"></p>
+    </div>
+    </td>
+
+  </tr>
+</table>
+</div>
+</body>
+</html>
