@@ -20,12 +20,12 @@ public class Book {
     private int bookId;
 
     @Column
-    @NotNull(message = "book must has name!")
+    @NotNull(message = "book name is required!")
     @Size(min = 2, max = 64,message = "name of book must be between 2 and 64 characters")
     private String name;
 
     @Column
-    @NotNull(message = "fill the author")
+    @NotNull(message = "author's name is required!")
     @Size(min = 2, max = 100, message = "name of author must be between 2 and 100 symbols")
     private String author;
 
