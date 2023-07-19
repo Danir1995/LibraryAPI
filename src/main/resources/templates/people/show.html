@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>show person</title>
+</head>
+<body>
+<p th:text="${person.getFullName() + ', ' + person.getYearOfBirth()}">VALUE</p>
+<p th:text="${'ID: ' + person.getPersonId()}">VALUE</p>
+<br/>
+<hr/>
+<div th:if="${person.getBookList().isEmpty()}">
+    <p>person didn't take any book</p>
+</div>
+<div th:if="${not person.getBookList().isEmpty()}">
+    <p>Books taken by person:</p>
+    <ul>
+        <!-- Итерируемся по списку книг и отображаем их -->
+        <li th:each="book : ${person.getBookList()}" th:text="${book.getName() + ', ' + book.getAuthor() + ', ' + book.getYear()}"
+            th:style="${book.isOverdue()? 'color: red;' : 'color: black;'}"></li>
+    </ul>
+</div>
+
+<br/>
+<hr/>
+
+<a th:href="@{/people/{id}/edit(id=${person.personId})}">
+    <button type="button" class="edit-button">Edit</button>
+</a>
+<br/>
+<hr/>
+<form th:method="DELETE" th:action="@{/people/{id}(id=${person.getPersonId()})}">
+    <input type="submit" value="Delete"/>
+</form>
+<br/>
+<hr/>
+<a th:href="@{/templates/people}">LIST OF PEOPLE</a>
+</body>
+</html>
