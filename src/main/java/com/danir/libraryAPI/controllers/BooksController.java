@@ -44,7 +44,7 @@ public class BooksController {
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", bookPage.getTotalPages());
 
-        return "/bookIndex";
+        return "book/bookIndex";
     }
 
     @GetMapping("/{id}")
@@ -53,12 +53,12 @@ public class BooksController {
         model.addAttribute("book", book);
         model.addAttribute("people", peopleService.findAll());
         model.addAttribute("isOverdue", book.isOverdue());
-        return "/bookShow";
+        return "book/bookShow";
     }
 
     @GetMapping("/newBook")
     public String newPerson(@ModelAttribute("book") Book book){
-        return "newBook";
+        return "book/newBook";
     }
 
     @PostMapping
@@ -66,7 +66,7 @@ public class BooksController {
                              BindingResult bindingResult){
 
         if (bindingResult.hasErrors()) {
-            return "newBook";
+            return "book/newBook";
         }
 
         bookService.save(book);
@@ -76,14 +76,14 @@ public class BooksController {
     @GetMapping("/{id}/editBook")
     public String edit(@PathVariable("id") int id, Model model){
         model.addAttribute("book", bookService.findOne(id));
-        return "editBook";
+        return "book/editBook";
     }
 
     @PatchMapping("/{id}")
     public String updateBook(@ModelAttribute("book") @Valid Book book, BindingResult bindingResult,
                              @PathVariable("id") int id){
         if (bindingResult.hasErrors()){
-            return "/editBook";
+            return "book/editBook";
         }
 
         bookService.update(id, book);
@@ -120,7 +120,7 @@ public class BooksController {
     @GetMapping("/search")
     public String search()
     {
-        return "searching";
+        return "book/searching";
     }
 
     @GetMapping("/result")
@@ -128,7 +128,7 @@ public class BooksController {
         List<Book> books = bookService.searchBooksByTitle(name);
         model.addAttribute("books", books);
 
-        return "resultsOfSearching";
+        return "book/resultsOfSearching";
     }
 
 
