@@ -1,5 +1,6 @@
 package com.danir.libraryAPI.controllers;
 
+import com.danir.libraryAPI.dto.BookDTO;
 import com.danir.libraryAPI.models.Book;
 import com.danir.libraryAPI.models.Person;
 import com.danir.libraryAPI.services.BookService;
@@ -7,6 +8,7 @@ import com.danir.libraryAPI.services.PeopleService;
 import jakarta.validation.Valid;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -26,10 +28,13 @@ public class BooksController {
     private final BookService bookService;
     private final PeopleService peopleService;
 
+    private final ModelMapper modelMapper;
+
     @Autowired
-    public BooksController(BookService bookService, PeopleService peopleService) {
+    public BooksController(BookService bookService, PeopleService peopleService, ModelMapper modelMapper) {
         this.bookService = bookService;
         this.peopleService = peopleService;
+        this.modelMapper = modelMapper;
     }
 
     @GetMapping
@@ -57,19 +62,19 @@ public class BooksController {
     }
 
     @GetMapping("/newBook")
-    public String newPerson(@ModelAttribute("book") Book book){
+    public String newPerson(@ModelAttribute("book") BookDTO bookDTO){
         return "book/newBook";
     }
 
     @PostMapping
-    public String createBook(@ModelAttribute("book") @Valid Book book,
+    public String createBook(@ModelAttribute("book") @Valid BookDTO bookDTO,
                              BindingResult bindingResult){
 
         if (bindingResult.hasErrors()) {
             return "book/newBook";
         }
 
-        bookService.save(book);
+        bookService.save(convertToBook(bookDTO));
         return "redirect:/books";
     }
 
@@ -80,13 +85,13 @@ public class BooksController {
     }
 
     @PatchMapping("/{id}")
-    public String updateBook(@ModelAttribute("book") @Valid Book book, BindingResult bindingResult,
+    public String updateBook(@ModelAttribute("book") @Valid BookDTO bookDTO, BindingResult bindingResult,
                              @PathVariable("id") int id){
         if (bindingResult.hasErrors()){
             return "book/editBook";
         }
 
-        bookService.update(id, book);
+        bookService.update(id, convertToBook(bookDTO));
         return "redirect:/books";
     }
 
@@ -129,6 +134,14 @@ public class BooksController {
         model.addAttribute("books", books);
 
         return "book/resultsOfSearching";
+    }
+
+    private Book convertToBook(BookDTO bookDTO) {
+        return modelMapper.map(bookDTO, Book.class);
+    }
+
+    private BookDTO convertToBookDTO(Book book) {
+        return modelMapper.map(book, BookDTO.class);
     }
 
 

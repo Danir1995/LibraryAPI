@@ -1,9 +1,11 @@
 package com.danir.libraryAPI.controllers;
 
+import com.danir.libraryAPI.dto.PersonDTO;
 import com.danir.libraryAPI.models.Person;
 import com.danir.libraryAPI.services.PeopleService;
 import com.danir.libraryAPI.util.PeopleValidator;
 import jakarta.validation.Valid;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -18,10 +20,13 @@ public class PeopleController {
     private final PeopleService peopleService;
     private final PeopleValidator validator;
 
+    private final ModelMapper modelMapper;
+
     @Autowired
-    public PeopleController(PeopleService peopleService, PeopleValidator validator) {
+    public PeopleController(PeopleService peopleService, PeopleValidator validator, ModelMapper modelMapper) {
         this.peopleService = peopleService;
         this.validator = validator;
+        this.modelMapper = modelMapper;
     }
 
     @GetMapping("")
@@ -39,18 +44,18 @@ public class PeopleController {
     }
 
     @GetMapping("/new")
-    public String newPerson(@ModelAttribute("person") Person person){
+    public String newPerson(@ModelAttribute("person") PersonDTO personDTO){
         return "people/new";
     }
 
     @PostMapping()
-    public String create(@ModelAttribute("person") @Valid Person person,
+    public String create(@ModelAttribute("person") @Valid PersonDTO personDTO,
                          BindingResult result) {
-        validator.validate(person, result);
+        validator.validate(convertToPerson(personDTO), result);
         if (result.hasErrors()){
             return "people/new";
         }
-        peopleService.save(person);
+        peopleService.save(convertToPerson(personDTO));
         return "redirect:/people";
     }
 
@@ -61,13 +66,13 @@ public class PeopleController {
     }
 
     @PatchMapping("/{id}")
-    public String update(@ModelAttribute("person") @Valid Person person, BindingResult result,
+    public String update(@ModelAttribute("person") @Valid PersonDTO personDTO, BindingResult result,
                          @PathVariable("id") int id){
-        validator.validate(person, result);
+        validator.validate(convertToPerson(personDTO), result);
         if (result.hasErrors()){
             return "people/edit";
         }
-        peopleService.update(id, person);
+        peopleService.update(id, convertToPerson(personDTO));
         return "redirect:/people";
     }
 
@@ -75,5 +80,13 @@ public class PeopleController {
     public String delete(@PathVariable("id") int id) {
         peopleService.delete(id);
         return "redirect:/people";
+    }
+
+    private Person convertToPerson(PersonDTO personDTO){
+        return modelMapper.map(personDTO, Person.class);
+    }
+
+    private PersonDTO convertToPersonDTO(Person person){
+        return modelMapper.map(person, PersonDTO.class);
     }
 }
