@@ -22,7 +22,6 @@ public class PeopleController {
 
     private final ModelMapper modelMapper;
 
-    @Autowired
     public PeopleController(PeopleService peopleService, PeopleValidator validator, ModelMapper modelMapper) {
         this.peopleService = peopleService;
         this.validator = validator;

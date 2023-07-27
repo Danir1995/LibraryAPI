@@ -30,7 +30,6 @@ public class BooksController {
 
     private final ModelMapper modelMapper;
 
-    @Autowired
     public BooksController(BookService bookService, PeopleService peopleService, ModelMapper modelMapper) {
         this.bookService = bookService;
         this.peopleService = peopleService;

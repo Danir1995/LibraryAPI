@@ -3,6 +3,7 @@ package com.danir.libraryAPI.models;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -11,8 +12,7 @@ import java.time.OffsetDateTime;
 
 @Entity
 @Table(name = "book")
-@Getter
-@Setter
+@Data
 public class Book {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

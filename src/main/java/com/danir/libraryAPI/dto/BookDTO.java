@@ -2,11 +2,11 @@ package com.danir.libraryAPI.dto;
 
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
-@Getter
-@Setter
+@Data
 public class BookDTO {
 
     @NotNull(message = "book must has name!")
