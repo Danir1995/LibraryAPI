@@ -1,5 +1,6 @@
 package com.danir.libraryAPI.util;
 
+import com.danir.libraryAPI.dto.PersonDTO;
 import com.danir.libraryAPI.models.Person;
 import com.danir.libraryAPI.services.PeopleService;
 import org.springframework.stereotype.Component;
@@ -16,15 +17,16 @@ public class PeopleValidator implements Validator {
 
     @Override
     public boolean supports(Class<?> clazz) {
-        return Person.class.equals(clazz);
+        return PersonDTO.class.equals(clazz);
     }
 
     @Override
     public void validate(Object target, Errors errors) {
-        Person person = (Person) target;
+        PersonDTO personDTO = (PersonDTO) target;
 
-        if (peopleService.show(person.getFullName()).isPresent()){
-            errors.rejectValue("fullName", "", "this name is already exist");
+        if (peopleService.show(personDTO.getFullName()).isPresent()) {
+            errors.rejectValue("fullName", "", "This name already exists");
         }
     }
+
 }

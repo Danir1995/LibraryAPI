@@ -46,7 +46,7 @@ public class PeopleService {
     }
 
     public Optional<Person> show(String fullName) {
-       return peopleRepository.findByFullName(fullName);
+       return peopleRepository.findByFullNameIgnoreCase(fullName);
     }
 
 

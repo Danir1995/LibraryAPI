@@ -6,7 +6,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import org.springframework.lang.NonNullApi;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -17,4 +16,5 @@ public interface BookRepository extends JpaRepository<Book, Integer> {
     Page<Book> findAll(Pageable pageable);
     @Query("from Book b where b.name like :title%")
     List<Book> findByTitleStartingWith(@Param("title") String title);
+    Page<Book> findByPersonIsNullAndReservedByIsNull(Pageable pageable);
 }

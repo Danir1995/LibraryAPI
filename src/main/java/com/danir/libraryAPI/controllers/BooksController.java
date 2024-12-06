@@ -17,6 +17,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
 
@@ -28,35 +29,54 @@ public class BooksController {
     private final BookService bookService;
     private final PeopleService peopleService;
 
-    private final ModelMapper modelMapper;
 
-    public BooksController(BookService bookService, PeopleService peopleService, ModelMapper modelMapper) {
+    public BooksController(BookService bookService, PeopleService peopleService) {
         this.bookService = bookService;
         this.peopleService = peopleService;
-        this.modelMapper = modelMapper;
+        // this.modelMapper = modelMapper;
     }
 
     @GetMapping
     public String index(@RequestParam(required = false, defaultValue = "0") int page,
                         @RequestParam(required = false, defaultValue = "5") int size,
-            Model model){
+                        @RequestParam(required = false, defaultValue = "false") boolean onlyAvailable,
+                        Model model){
 
-        Page<Book> bookPage = bookService.findAll(PageRequest.of(page, size, Sort.by("year")));
+        Page<Book> bookPage;
+        if (onlyAvailable) {
+            bookPage = bookService.getAvailableBooks(PageRequest.of(page, size, Sort.by("year")));
+        } else {
+            bookPage = bookService.findAll(PageRequest.of(page, size, Sort.by("year")));
+        }
+
         List<Book> bookList = bookPage.getContent();
 
-        model.addAttribute("books", bookList);
+        List<BookDTO> bookDTOList = bookList.stream()
+                .map(book -> {
+                    BookDTO bookDTO = bookService.convertToBookDTO(book); // Используем метод конвертации
+                    bookDTO.setOverdue(bookService.isOverdue(book)); // Устанавливаем просроченность
+                    return bookDTO;
+                })
+                .toList();
+
+        model.addAttribute("books", bookDTOList);
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", bookPage.getTotalPages());
-
+        model.addAttribute("onlyAvailable", onlyAvailable);
         return "book/bookIndex";
     }
 
     @GetMapping("/{id}")
     public String show(@PathVariable("id")int id, Model model){
-        Book book = bookService.findOne(id);
-        model.addAttribute("book", book);
+
+        BookDTO bookDTO = bookService.getBookDetails(id);
+
+        model.addAttribute("book", bookDTO);
         model.addAttribute("people", peopleService.findAll());
-        model.addAttribute("isOverdue", book.isOverdue());
+         model.addAttribute("isOverdue", bookDTO.isOverdue());
+        model.addAttribute("isOccupied", bookDTO.getPerson_name() != null);
+        model.addAttribute("isReserved", bookDTO.getReserved_by_name() != null);
+
         return "book/bookShow";
     }
 
@@ -73,13 +93,15 @@ public class BooksController {
             return "book/newBook";
         }
 
-        bookService.save(convertToBook(bookDTO));
+        bookService.save(bookService.convertToBook(bookDTO));
         return "redirect:/books";
     }
 
     @GetMapping("/{id}/editBook")
     public String edit(@PathVariable("id") int id, Model model){
-        model.addAttribute("book", bookService.findOne(id));
+        Book book = bookService.findOne(id);
+        BookDTO bookDTO = bookService.convertToBookDTO(book);
+        model.addAttribute("book", bookDTO);
         return "book/editBook";
     }
 
@@ -90,7 +112,7 @@ public class BooksController {
             return "book/editBook";
         }
 
-        bookService.update(id, convertToBook(bookDTO));
+        bookService.update(id, bookService.convertToBook(bookDTO));
         return "redirect:/books";
     }
 
@@ -135,13 +157,27 @@ public class BooksController {
         return "book/resultsOfSearching";
     }
 
-    private Book convertToBook(BookDTO bookDTO) {
-        return modelMapper.map(bookDTO, Book.class);
+    @PostMapping("/{bookId}/reserve")
+    public String reserveBook(@PathVariable int bookId, @RequestParam int personId,
+                              RedirectAttributes redirectAttributes, Model model) {
+        String errorMessage = bookService.reserveBook(bookId, personId);
+        if (errorMessage != null) {
+            redirectAttributes.addFlashAttribute("errorMessage", errorMessage);
+            return "redirect:/books/" + bookId; // Редирект на GET метод
+        }
+        redirectAttributes.addFlashAttribute("message", "Book reserved successfully");
+        return "redirect:/books/" + bookId;  // Название шаблона для отображения
     }
 
-    private BookDTO convertToBookDTO(Book book) {
-        return modelMapper.map(book, BookDTO.class);
+    // Отмена бронирования
+    @DeleteMapping("/{bookId}/cancel-reservation")
+    public String cancelReservation(@PathVariable int bookId, Model model) {
+        bookService.cancelReservation(bookId);
+        model.addAttribute("message", "Reservation cancelled successfully");
+        return "redirect:/books/" + bookId;  // Название шаблона для отображения
     }
+
+
 
 
 }

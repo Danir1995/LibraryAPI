@@ -33,6 +33,9 @@ public class Person {
     @OneToMany(mappedBy = "person")
     private List<Book> bookList;
 
+    @OneToMany(mappedBy = "reservedBy")
+    private List<Book> reservedBooks;
+
     public Person() {
     }
 

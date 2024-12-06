@@ -1,6 +1,8 @@
 package com.danir.libraryAPI.models;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
@@ -30,6 +32,8 @@ public class Book {
     private String author;
 
     @Column
+    @Min(value = 1300, message = "Year can not be less than 1300")
+    @NotNull(message = "fill this line")
     private int year;
 
     @Column(name = "borrowed_date")
@@ -39,6 +43,12 @@ public class Book {
     @JoinColumn(name = "person_id")
     private Person person;
 
+    @ManyToOne
+    @JoinColumn(name = "reserved_by_id")
+    private Person reservedBy;
+
+    private boolean isOverdue;
+
     public Book() {
     }
 
@@ -46,10 +56,6 @@ public class Book {
         this.author = author;
         this.name = name;
         this.year = year;
-    }
-
-    public boolean isOverdue() {
-        return borrowedDate != null && borrowedDate.isBefore(OffsetDateTime.now().minusDays(10));
     }
 
 }

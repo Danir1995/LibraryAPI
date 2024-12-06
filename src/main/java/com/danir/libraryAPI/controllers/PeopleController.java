@@ -11,12 +11,13 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 
 @Controller
 @RequestMapping("/people")
 public class PeopleController {
+
     private final PeopleService peopleService;
     private final PeopleValidator validator;
 
@@ -50,7 +51,8 @@ public class PeopleController {
     @PostMapping()
     public String create(@ModelAttribute("person") @Valid PersonDTO personDTO,
                          BindingResult result) {
-        validator.validate(convertToPerson(personDTO), result);
+      //  validator.validate(convertToPerson(personDTO), result);
+        validator.validate(personDTO, result);
         if (result.hasErrors()){
             return "people/new";
         }
@@ -67,7 +69,11 @@ public class PeopleController {
     @PatchMapping("/{id}")
     public String update(@ModelAttribute("person") @Valid PersonDTO personDTO, BindingResult result,
                          @PathVariable("id") int id){
-        validator.validate(convertToPerson(personDTO), result);
+        Person person = peopleService.findOne(id);
+        if (!personDTO.getFullName().equals(person.getFullName())){
+            validator.validate(personDTO, result);
+        }
+
         if (result.hasErrors()){
             return "people/edit";
         }
@@ -76,7 +82,14 @@ public class PeopleController {
     }
 
     @DeleteMapping("/{id}")
-    public String delete(@PathVariable("id") int id) {
+    public String delete(@PathVariable("id") int id, Model model, RedirectAttributes redirectAttributes) {
+        Person person = peopleService.findOne(id);
+
+        // Проверяем, есть ли у человека книги
+        if (!person.getBookList().isEmpty()) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Cannot delete person before receiving books");
+            return "redirect:/people/" + id;  // Здесь можешь вернуть страницу с деталями человека или другой, где отображаются ошибки.
+        }
         peopleService.delete(id);
         return "redirect:/people";
     }
