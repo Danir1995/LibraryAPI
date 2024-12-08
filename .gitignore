@@ -36,7 +36,7 @@ replay_pid*
 # Build output directories
 out/
 target/
-
+*.properties
 # Other OS-specific files
 .DS_Store
 Thumbs.db
