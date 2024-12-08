@@ -19,6 +19,24 @@
 *.tar.gz
 *.rar
 
-# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
+# Virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
 replay_pid*
+
+# IDEA directory and project files
+.idea/
+*.iml
+
+# User-specific files
+*.ipr
+*.iws
+*.user
+*.user.xml
+
+# Build output directories
+out/
+target/
+*.properties
+# Other OS-specific files
+.DS_Store
+Thumbs.db
