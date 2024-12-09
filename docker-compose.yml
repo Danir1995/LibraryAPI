@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  app:
+    image: openjdk:17
+    container_name: java_backend_app
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      - DB_URL=${DB_URL:-jdbc:postgresql://localhost:5432/project1}
+      - DB_USERNAME=${DB_USERNAME:-postgres}
+      - DB_PASSWORD=${DB_PASSWORD:-password}
+    env_file:
+      - .env
+    volumes:
+      - .:/usr/src/app
+    networks:
+      - backend
+
+  db:
+    image: postgres:13
+    container_name: java_backend_db
+    environment:
+      - POSTGRES_USER=${DB_USERNAME:-postgres}
+      - POSTGRES_PASSWORD=${DB_PASSWORD:-password}
+      - POSTGRES_DB=${DB_NAME:-project1}
+    ports:
+      - "5432:5432"
+    networks:
+      - backend
+
+networks:
+  backend:
+    driver: bridge
