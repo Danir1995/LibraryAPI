@@ -10,7 +10,7 @@
         <relativePath/>
     </parent>
     <groupId>danir.ru</groupId>
-    <artifactId>springcourse</artifactId>
+    <artifactId>libraryAPI</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>springBootApp</name>
     <description>libraryAPI</description>
