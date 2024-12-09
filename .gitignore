@@ -40,3 +40,6 @@ target/
 # Other OS-specific files
 .DS_Store
 Thumbs.db
+
+# ignore env
+.env
