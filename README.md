@@ -24,8 +24,9 @@ The application will automatically detect these values and override the defaults
 3)To run the project using Docker, put in terminal:
 docker-compose up --build
 
-4)If you see this : "ERROR: Windows named pipe error: Channel is closed. (code: 109)" - 
-use this command to run:
+4)If you see this error: "ERROR: Windows named pipe error: Channel is closed. (code: 109)", 
+go to the Docker app and click "Start" on the "java_backend_app" container
+and use this command to run:
 mvn spring-boot:run
 
 And after you can go to : http://localhost:8080/people to check my project :)
