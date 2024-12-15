@@ -82,13 +82,13 @@ public class PeopleController {
     }
 
     @DeleteMapping("/{id}")
-    public String delete(@PathVariable("id") int id, Model model, RedirectAttributes redirectAttributes) {
+    public String delete(@PathVariable("id") int id, RedirectAttributes redirectAttributes) {
         Person person = peopleService.findOne(id);
 
-        // Проверяем, есть ли у человека книги
+        // Check if person has assigned books
         if (!person.getBookList().isEmpty()) {
             redirectAttributes.addFlashAttribute("errorMessage", "Cannot delete person before receiving books");
-            return "redirect:/people/" + id;  // Здесь можешь вернуть страницу с деталями человека или другой, где отображаются ошибки.
+            return "redirect:/people/" + id;
         }
         peopleService.delete(id);
         return "redirect:/people";
