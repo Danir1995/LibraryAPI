@@ -8,8 +8,6 @@ import com.danir.libraryAPI.services.PeopleService;
 import jakarta.validation.Valid;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -33,7 +31,6 @@ public class BooksController {
     public BooksController(BookService bookService, PeopleService peopleService) {
         this.bookService = bookService;
         this.peopleService = peopleService;
-        // this.modelMapper = modelMapper;
     }
 
     @GetMapping
@@ -53,8 +50,8 @@ public class BooksController {
 
         List<BookDTO> bookDTOList = bookList.stream()
                 .map(book -> {
-                    BookDTO bookDTO = bookService.convertToBookDTO(book); // Используем метод конвертации
-                    bookDTO.setOverdue(bookService.isOverdue(book)); // Устанавливаем просроченность
+                    BookDTO bookDTO = bookService.convertToBookDTO(book);
+                    bookDTO.setOverdue(bookService.isOverdue(book));
                     return bookDTO;
                 })
                 .toList();
@@ -159,22 +156,21 @@ public class BooksController {
 
     @PostMapping("/{bookId}/reserve")
     public String reserveBook(@PathVariable int bookId, @RequestParam int personId,
-                              RedirectAttributes redirectAttributes, Model model) {
+                              RedirectAttributes redirectAttributes) {
         String errorMessage = bookService.reserveBook(bookId, personId);
         if (errorMessage != null) {
             redirectAttributes.addFlashAttribute("errorMessage", errorMessage);
-            return "redirect:/books/" + bookId; // Редирект на GET метод
+            return "redirect:/books/" + bookId; // Redirect to Get method
         }
         redirectAttributes.addFlashAttribute("message", "Book reserved successfully");
-        return "redirect:/books/" + bookId;  // Название шаблона для отображения
+        return "redirect:/books/" + bookId;
     }
 
-    // Отмена бронирования
     @DeleteMapping("/{bookId}/cancel-reservation")
     public String cancelReservation(@PathVariable int bookId, Model model) {
         bookService.cancelReservation(bookId);
         model.addAttribute("message", "Reservation cancelled successfully");
-        return "redirect:/books/" + bookId;  // Название шаблона для отображения
+        return "redirect:/books/" + bookId;
     }
 
 
