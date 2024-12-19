@@ -1,13 +1,11 @@
 package com.danir.libraryAPI.models;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
-
 import java.util.List;
 
 @Entity
@@ -25,6 +23,10 @@ public class Person {
     @NotNull(message = "full name can not be empty")
     private String fullName;
 
+    @Column(nullable = false, unique = true)
+    @Email(message = "Invalid email format")
+    private String email;
+
     @Column(name = "year_of_birth")
     @Min(value = 1920, message = "Year can not be less than 1920")
     @NotNull(message = "fill this line")
@@ -39,7 +41,8 @@ public class Person {
     public Person() {
     }
 
-    public Person(String fullName, int yearOfBirth) {
+    public Person(String fullName, int yearOfBirth, String email) {
+        this.email = email;
         this.fullName = fullName;
         this.yearOfBirth = yearOfBirth;
     }
