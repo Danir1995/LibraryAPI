@@ -1,14 +1,10 @@
 package com.danir.libraryAPI.models;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
-
 import java.time.OffsetDateTime;
 
 
@@ -47,7 +43,8 @@ public class Book {
     @JoinColumn(name = "reserved_by_id")
     private Person reservedBy;
 
-    private boolean isOverdue;
+    @Column
+    public boolean isOverdue;
 
     public Book() {
     }
@@ -57,5 +54,4 @@ public class Book {
         this.name = name;
         this.year = year;
     }
-
 }
