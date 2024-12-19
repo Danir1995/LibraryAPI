@@ -1,34 +1,41 @@
 package com.danir.libraryAPI.services;
 
 import com.danir.libraryAPI.dto.BookDTO;
+import com.danir.libraryAPI.email.EmailService;
 import com.danir.libraryAPI.models.Book;
 import com.danir.libraryAPI.models.Person;
 import com.danir.libraryAPI.repositories.BookRepository;
 import com.danir.libraryAPI.repositories.PeopleRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.List;
 
 @Service
 @Transactional(readOnly = true)
+@Slf4j
+@EnableScheduling
 public class BookService {
 
     private final BookRepository bookRepository;
     private final PeopleRepository peopleRepository;
     private final ModelMapper modelMapper;
+    private final EmailService emailService;
 
     @Autowired
-    public BookService(BookRepository bookRepository, PeopleRepository peopleRepository, ModelMapper modelMapper) {
+    public BookService(BookRepository bookRepository, PeopleRepository peopleRepository, ModelMapper modelMapper, EmailService emailService) {
         this.bookRepository = bookRepository;
         this.peopleRepository = peopleRepository;
         this.modelMapper = modelMapper;
+        this.emailService = emailService;
     }
 
     public List<Book> findAll() {
@@ -84,7 +91,7 @@ public class BookService {
                 .orElseThrow(() -> new IllegalArgumentException("Book not found"));
 
         if (book.getReservedBy() != null) {
-            return "Book is already reserved"; // Возвращаем сообщение об ошибке
+            return "Book is already reserved";
         }
 
         Person person = peopleRepository.findById(personId)
@@ -104,7 +111,6 @@ public class BookService {
         bookRepository.save(book);
     }
 
-    // Дополнительный метод для получения доступных для взятия книг
     public Page<Book> getAvailableBooks(PageRequest pageRequest) {
         return bookRepository.findByPersonIsNullAndReservedByIsNull(pageRequest);
     }
@@ -113,7 +119,6 @@ public class BookService {
         Book book = findOne(id);
         BookDTO bookDTO = convertToBookDTO(book);
         bookDTO.setOverdue(isOverdue(book));
-
         if (book.getPerson() != null) {
             bookDTO.setPerson_name(book.getPerson().getFullName());
         }
@@ -124,10 +129,41 @@ public class BookService {
         return bookDTO;
     }
 
+    @Scheduled(cron = "0 1 0 * * ?")
+    @Transactional
+    public void updateOverdueBooks() {
+        bookRepository.updateOverdueBooks();
+    }
 
     public boolean isOverdue(Book book) {
         OffsetDateTime date = book.getBorrowedDate();
         return date != null && date.isBefore(OffsetDateTime.now().minusDays(10));
+    }
+
+    @Scheduled(cron = "0 0 12 * * ?")
+    public void sendOverdueNotifications() {
+        OffsetDateTime tenDaysAgo = OffsetDateTime.now().minusDays(10);
+        PageRequest pageRequest = PageRequest.of(0, 50);
+
+        Page<Book> overdueBooksPage = bookRepository.findOverdueBooks(tenDaysAgo, pageRequest);
+        while (overdueBooksPage.hasContent()) {
+            for (Book book : overdueBooksPage.getContent()) {
+                if (book.getPerson() != null && book.getPerson().getEmail() != null) {
+                    try {
+                        emailService.sendEmail(
+                                book.getPerson().getEmail(),
+                                "Overdue Book Notification",
+                                "Hello, dear " + book.getPerson().getFullName() + ". You have an overdue book: " + book.getName() + ". Please return it."
+                        );
+                        log.info("Notification sent for overdue book: {}", book.getName());
+                    } catch (Exception e) {
+                        log.error("Failed to send email for book: {}. Error: {}", book.getName(), e.getMessage());
+                    }
+                }
+            }
+            pageRequest = pageRequest.next();
+            overdueBooksPage = bookRepository.findOverdueBooks(tenDaysAgo, pageRequest);
+        }
     }
 
     public Book convertToBook(BookDTO bookDTO) {
@@ -137,7 +173,4 @@ public class BookService {
     public BookDTO convertToBookDTO(Book book) {
         return modelMapper.map(book, BookDTO.class);
     }
-
 }
-
-
