@@ -1,15 +1,6 @@
 package com.danir.libraryAPI.dto;
-
-import jakarta.persistence.Column;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
 
 @Data
 public class PersonDTO {
@@ -21,4 +12,8 @@ public class PersonDTO {
     @Min(value = 1920, message = "Year can not be less than 1920")
     @NotNull(message = "fill this line")
     private int yearOfBirth;
+
+    @Email(message = "Invalid email address")
+    @NotBlank(message = "Email is required")
+    private String email;
 }
