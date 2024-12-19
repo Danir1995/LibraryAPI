@@ -172,8 +172,4 @@ public class BooksController {
         model.addAttribute("message", "Reservation cancelled successfully");
         return "redirect:/books/" + bookId;
     }
-
-
-
-
 }
