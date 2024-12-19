@@ -1,6 +1,5 @@
 package com.danir.libraryAPI.dto;
 
-import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -9,9 +8,6 @@ import lombok.Data;
 @Data
 public class BookDTO {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "book_id", nullable = false)
     private int bookId;
 
     @NotNull(message = "book must has name!")
