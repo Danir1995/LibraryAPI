@@ -74,6 +74,7 @@ public class BookService {
         book.setBookId(id);
         book.setPerson(null);
         book.setBorrowedDate(null);
+        book.setOverdue(false);
         bookRepository.save(book);
     }
 
