@@ -15,6 +15,7 @@
         <div class="card-header bg-primary text-white">
             <h3 th:text="${person.getFullName()}"></h3>
             <p th:text="'Year of Birth: ' + ${person.getYearOfBirth()}"></p>
+            <p th:text="'Email: ' + ${person.getEmail()}"></p>
             <p th:text="'ID: ' + ${person.getPersonId()}"></p>
         </div>
         <div class="card-body">
