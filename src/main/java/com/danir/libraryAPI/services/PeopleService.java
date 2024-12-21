@@ -49,5 +49,8 @@ public class PeopleService {
        return peopleRepository.findByFullNameIgnoreCase(fullName);
     }
 
+    public boolean emailExists(String email) {
+        return peopleRepository.findByEmail(email).isPresent();
+    }
 
 }
