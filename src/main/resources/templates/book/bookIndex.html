@@ -2,26 +2,53 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>all books</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All Books</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css">
 </head>
-<body>
+<body class="bg-light">
+<div class="container mt-5">
+    <div class="card">
+        <div class="card-header bg-primary text-white">
+            <h2>List of Books</h2>
+        </div>
+        <div class="card-body">
+            <div class="mb-3">
+                <a th:href="@{/books(onlyAvailable=true)}" th:if="${!onlyAvailable}" class="btn btn-secondary mb-3">
+                    Show Only Available Books
+                </a>
+            </div>
 
-<a th:href="@{/books(onlyAvailable=true)}" th:if="${!onlyAvailable}">Show only available books</a>
+            <ul class="list-group mb-3">
+                <li th:each="book : ${books}"
+                    class="list-group-item d-flex justify-content-between align-items-center">
+                    <a th:href="@{/books/{id}(id=${book.getBookId()})}"
+                       th:text="${book.getName() + ', ' + book.getAuthor() + ', ' + book.getYear()}"
+                       th:style="${book.isOverdue() ? 'color: red;' : 'color: black;'}">
+                    </a>
+                </li>
+            </ul>
 
-<h1>List of Books</h1>
-<div th:each="book : ${books}">
-  <a th:href="@{/books/{id}(id=${book.getBookId()})}"
-     th:text="${book.getName() + ', ' + book.getAuthor() + ', ' + book.getYear()}"
-     th:style="${book.isOverdue()? 'color: red;' : 'color: black;'}">book</a>
+            <div class="d-flex justify-content-between">
+                <a th:if="${currentPage < totalPages - 1}"
+                   th:href="@{/books(page=${currentPage + 1}, size=${books.size()})}"
+                   class="btn btn-primary">
+                    Next Page
+                </a>
+                <div></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mt-3">
+        <div class="card-body d-flex justify-content-around">
+            <a th:href="@{/books/newBook}" class="btn btn-success">Add New Book</a>
+            <a th:href="@{/books/search}" class="btn btn-info">Search Book</a>
+            <a th:href="@{/people}" class="btn btn-warning">List of People</a>
+        </div>
+    </div>
 </div>
-<br/>
-<a th:if="${currentPage < totalPages - 1}" th:href="@{/books(page=${currentPage + 1}, size=${books.size()})}">Next Page</a>
-<hr/>
-<a th:href="@{/books/newBook}">ADD NEW BOOK</a>
-<br/>
-<a th:href="@{/books/search}">SEARCH BOOK</a>
-<br/>
-<a th:href="@{/people}">LIST OF PEOPLE</a>
 
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
