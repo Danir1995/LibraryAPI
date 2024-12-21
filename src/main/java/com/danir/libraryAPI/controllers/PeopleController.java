@@ -6,7 +6,6 @@ import com.danir.libraryAPI.services.PeopleService;
 import com.danir.libraryAPI.util.PeopleValidator;
 import jakarta.validation.Valid;
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -51,11 +50,15 @@ public class PeopleController {
     @PostMapping()
     public String create(@ModelAttribute("person") @Valid PersonDTO personDTO,
                          BindingResult result) {
-      //  validator.validate(convertToPerson(personDTO), result);
+        if (peopleService.emailExists(personDTO.getEmail())) {
+            result.rejectValue("email", "error.person", "Email already exists");
+        }
+
         validator.validate(personDTO, result);
         if (result.hasErrors()){
             return "people/new";
         }
+
         peopleService.save(convertToPerson(personDTO));
         return "redirect:/people";
     }
