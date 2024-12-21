@@ -11,6 +11,7 @@ public class PersonDTO {
 
     @Min(value = 1920, message = "Year can not be less than 1920")
     @NotNull(message = "fill this line")
+    @Max(value = 2025, message = "Year of birth cannot be in the future")
     private int yearOfBirth;
 
     @Email(message = "Invalid email address")

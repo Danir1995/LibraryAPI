@@ -1,10 +1,7 @@
 package com.danir.libraryAPI.models;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import lombok.Data;
 import java.util.List;
 
@@ -29,6 +26,7 @@ public class Person {
 
     @Column(name = "year_of_birth")
     @Min(value = 1920, message = "Year can not be less than 1920")
+    @Max(value = 2025, message = "Year of birth cannot be in the future")
     @NotNull(message = "fill this line")
     private int yearOfBirth;
 
