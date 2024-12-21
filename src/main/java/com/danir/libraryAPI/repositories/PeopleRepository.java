@@ -10,7 +10,7 @@ import java.util.Optional;
 
 @Repository
 public interface PeopleRepository extends JpaRepository<Person, Integer> {
-    Optional<Person> findByFullName(String fullName);
     @Query("SELECT p FROM Person p WHERE LOWER(p.fullName) = LOWER(:fullName)")
     Optional<Person> findByFullNameIgnoreCase(@Param("fullName") String fullName);
+    Optional<Person> findByEmail(String email);
 }
