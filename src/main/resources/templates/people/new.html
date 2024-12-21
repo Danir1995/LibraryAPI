@@ -24,7 +24,7 @@
 
                 <div class="mb-3">
                     <label for="yearOfBirth" class="form-label">Year of Birth:</label>
-                    <input type="text" id="yearOfBirth" th:field="*{yearOfBirth}" class="form-control" required>
+                    <input type="number" id="yearOfBirth" th:field="*{yearOfBirth}" class="form-control" required>
                     <div class="text-danger" th:if="${#fields.hasErrors('yearOfBirth')}" th:errors="*{yearOfBirth}"></div>
                 </div>
 
