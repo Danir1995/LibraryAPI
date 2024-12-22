@@ -17,7 +17,7 @@ import java.util.List;
 public interface BookRepository extends JpaRepository<Book, Integer> {
     @Query("from Book b order by b.year")
     Page<Book> findAll(Pageable pageable);
-    @Query("from Book b where b.name like :title%")
+    @Query("from Book b where LOWER(b.name) like LOWER(:title) || '%'")
     List<Book> findByTitleStartingWith(@Param("title") String title);
     Page<Book> findByPersonIsNullAndReservedByIsNull(Pageable pageable);
     @Query("select b from Book b where b.borrowedDate is not null and b.borrowedDate <= :tenDaysAgo")
