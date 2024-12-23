@@ -1,32 +1,32 @@
-# LibraryAPI 
-A CRUD application for library management. 
-Technologies: Java, Spring Boot, Hibernate, PostgreSQL. 
+# LibraryAPI
+A CRUD application for library management.
+Technologies: Java, Spring Boot, Hibernate, PostgreSQL.
 Main functionality: adding and editing books, adding and assigning readers, reservation of books and tracking return deadlines.
 
 HOW TO RUN THE PROJECT:
 To run the project, you have two options for configuring the database connection:
 
-1: Use default values (no setup required)
-If you don't create an .env file or set environment variables, the application will use the following default values:
-Database URL: jdbc:postgresql://localhost:5432/project1
-Username: postgres
-Password: password
-These values are pre-configured in the application.properties file, so you can simply run the application without any changes.
+1. Use environment variables or .env file
+The application no longer has default values for database connection settings. You must provide your own configuration.
+You can either create an .env file in the project root or set the following environment variables:
+    DB_URL=jdbc:postgresql://your_host:your_port/your_database
+    DB_USERNAME=your_username
+    DB_PASSWORD=your_password
+    RABBITMQ_HOST=rabbitmq  # Replace with your RabbitMQ host if necessary
+    RABBITMQ_PORT=5672
+    RABBITMQ_USERNAME=guest  # Replace with your RabbitMQ username
+    RABBITMQ_PASSWORD=your_password
+    MAIL_USERNAME=your_email@gmail.com  # Replace with your email address
+    MAIL_PASSWORD=your_password
+2. Run the project using Docker
+You can set up the project with Docker by running the following commands:
+   docker-compose up --build
+3. Run the project with Maven
+To run the project with Maven, use this command:
+   mvn spring-boot:run
+4. Once the application is running, you can visit:
+   http://localhost:8080/people to check the project.
 
-2: Customize via environment variables or .env file
-If you prefer to use your own database configuration, 
-you can do so by creating an .env file in the project root or setting the following environment variables:
-DB_URL=jdbc:postgresql://your_host:your_port/your_database
-DB_USERNAME=your_username
-DB_PASSWORD=your_password
-The application will automatically detect these values and override the defaults.
 
-3)To run the project using Docker, put in terminal:
-docker-compose up --build
 
-4)If you see this error: "ERROR: Windows named pipe error: Channel is closed. (code: 109)", 
-go to the Docker app and click "Start" on the "java_backend_app" container
-and use this command to run:
-mvn spring-boot:run
 
-And after you can go to : http://localhost:8080/people to check my project :)
