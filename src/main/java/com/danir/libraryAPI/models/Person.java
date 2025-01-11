@@ -27,8 +27,8 @@ public class Person {
     @Column(name = "year_of_birth")
     @Min(value = 1920, message = "Year can not be less than 1920")
     @Max(value = 2025, message = "Year of birth cannot be in the future")
-    @NotNull(message = "fill this line")
-    private int yearOfBirth;
+    @NotNull(message = "please provide year")
+    private Integer yearOfBirth;
 
     @OneToMany(mappedBy = "person")
     private List<Book> bookList;
@@ -39,7 +39,7 @@ public class Person {
     public Person() {
     }
 
-    public Person(String fullName, int yearOfBirth, String email) {
+    public Person(String fullName, Integer yearOfBirth, String email) {
         this.email = email;
         this.fullName = fullName;
         this.yearOfBirth = yearOfBirth;

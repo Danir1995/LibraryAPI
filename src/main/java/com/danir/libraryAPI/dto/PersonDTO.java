@@ -1,4 +1,5 @@
 package com.danir.libraryAPI.dto;
+import jakarta.persistence.Column;
 import jakarta.validation.constraints.*;
 import lombok.Data;
 
@@ -9,10 +10,11 @@ public class PersonDTO {
     @NotNull(message = "full name can not be empty")
     private String fullName;
 
+    @Column(name = "year_of_birth")
     @Min(value = 1920, message = "Year can not be less than 1920")
-    @NotNull(message = "fill this line")
     @Max(value = 2025, message = "Year of birth cannot be in the future")
-    private int yearOfBirth;
+    @NotNull(message = "please provide year")
+    private Integer yearOfBirth;
 
     @Email(message = "Invalid email address")
     @NotBlank(message = "Email is required")
