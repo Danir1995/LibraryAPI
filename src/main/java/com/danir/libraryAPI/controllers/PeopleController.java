@@ -39,6 +39,7 @@ public class PeopleController {
         Person person = peopleService.findOne(id);
         model.addAttribute("person", person);
         model.addAttribute("bookList", person.getBookList());
+        model.addAttribute("borrowedBeforeBooks", person.getBorrowedBeforeBooks());
         return "people/show";
     }
 

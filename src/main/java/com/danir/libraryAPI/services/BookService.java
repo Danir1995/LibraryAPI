@@ -78,12 +78,19 @@ public class BookService {
             throw new IllegalArgumentException("The provided ID does not match the book's ID");
         }
 
-        // Снимаем книгу с пользователя
+        Person person = book.getPerson(); // take actual owner of the book
+        if (person != null) {
+            // add book to history of borrowing
+            if (!person.getBorrowedBeforeBooks().contains(book)) {
+                person.getBorrowedBeforeBooks().add(book);
+            }
+        }
+
         book.setPerson(null);
         book.setBorrowedDate(null);
         book.setOverdue(false);
 
-        // Сохраняем изменения в базе
+        // save changes
         bookRepository.save(book);
 
         notificationService.notifyBookReleased(book);

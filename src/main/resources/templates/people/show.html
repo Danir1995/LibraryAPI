@@ -41,6 +41,16 @@
                 </ul>
             </div>
         </div>
+        <div th:if="${not person.getBorrowedBeforeBooks().isEmpty()}">
+            <h5>History of books borrowed by the user:</h5>
+            <ul class="list-group">
+                <!-- Итерируемся по списку книг -->
+                <li class="list-group-item" th:each="book : ${person.getBorrowedBeforeBooks()}">
+                    <span th:text="${book.getName() + ', ' + book.getAuthor()}"></span>
+                </li>
+            </ul>
+        </div>
+
         <div class="card-footer text-center">
             <!-- Кнопка редактирования -->
             <a th:href="@{/people/{id}/edit(id=${person.personId})}" class="btn btn-info me-2">Edit</a>
