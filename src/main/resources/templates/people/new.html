@@ -17,8 +17,8 @@
         <div class="card-body">
             <form th:action="@{/people}" th:object="${person}" method="post" class="needs-validation" novalidate>
                 <div class="mb-3">
-                    <label for="firstName" class="form-label">Name:</label>
-                    <input type="text" id="firstName" th:field="*{fullName}" class="form-control" required>
+                    <label for="fullName" class="form-label">Name:</label>
+                    <input type="text" id="fullName" th:field="*{fullName}" class="form-control" required>
                     <div class="text-danger" th:if="${#fields.hasErrors('fullName')}" th:errors="*{fullName}"></div>
                 </div>
 
