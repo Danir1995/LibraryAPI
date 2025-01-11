@@ -1,7 +1,6 @@
 package com.danir.libraryAPI.services;
 
 import com.danir.libraryAPI.dto.BookDTO;
-import com.danir.libraryAPI.email.EmailService;
 import com.danir.libraryAPI.models.Book;
 import com.danir.libraryAPI.models.Person;
 import com.danir.libraryAPI.repositories.BookRepository;
@@ -28,14 +27,14 @@ public class BookService {
     private final BookRepository bookRepository;
     private final PeopleRepository peopleRepository;
     private final ModelMapper modelMapper;
-    private final EmailService emailService;
+    private final NotificationService notificationService;
 
     @Autowired
-    public BookService(BookRepository bookRepository, PeopleRepository peopleRepository, ModelMapper modelMapper, EmailService emailService) {
+    public BookService(BookRepository bookRepository, PeopleRepository peopleRepository, ModelMapper modelMapper, NotificationService notificationService) {
         this.bookRepository = bookRepository;
         this.peopleRepository = peopleRepository;
         this.modelMapper = modelMapper;
-        this.emailService = emailService;
+        this.notificationService = notificationService;
     }
 
     public List<Book> findAll() {
@@ -71,12 +70,25 @@ public class BookService {
 
     @Transactional
     public void release(Book book, int id) {
-        book.setBookId(id);
+        if (book == null) {
+            throw new IllegalArgumentException("Book cannot be null");
+        }
+
+        if (book.getBookId() != id) {
+            throw new IllegalArgumentException("The provided ID does not match the book's ID");
+        }
+
+        // Снимаем книгу с пользователя
         book.setPerson(null);
         book.setBorrowedDate(null);
         book.setOverdue(false);
+
+        // Сохраняем изменения в базе
         bookRepository.save(book);
+
+        notificationService.notifyBookReleased(book);
     }
+
 
     public Page<Book> findAll(PageRequest pageRequest) {
         return bookRepository.findAll(pageRequest);
@@ -141,31 +153,6 @@ public class BookService {
         return date != null && date.isBefore(OffsetDateTime.now().minusDays(10));
     }
 
-    @Scheduled(cron = "0 0 12 * * ?")
-    public void sendOverdueNotifications() {
-        OffsetDateTime tenDaysAgo = OffsetDateTime.now().minusDays(10);
-        PageRequest pageRequest = PageRequest.of(0, 50);
-
-        Page<Book> overdueBooksPage = bookRepository.findOverdueBooks(tenDaysAgo, pageRequest);
-        while (overdueBooksPage.hasContent()) {
-            for (Book book : overdueBooksPage.getContent()) {
-                if (book.getPerson() != null && book.getPerson().getEmail() != null) {
-                    try {
-                        emailService.sendEmail(
-                                book.getPerson().getEmail(),
-                                "Overdue Book Notification",
-                                "Hello, dear " + book.getPerson().getFullName() + ". You have an overdue book: " + book.getName() + ". Please return it."
-                        );
-                        log.info("Notification sent for overdue book: {}", book.getName());
-                    } catch (Exception e) {
-                        log.error("Failed to send email for book: {}. Error: {}", book.getName(), e.getMessage());
-                    }
-                }
-            }
-            pageRequest = pageRequest.next();
-            overdueBooksPage = bookRepository.findOverdueBooks(tenDaysAgo, pageRequest);
-        }
-    }
 
     public Book convertToBook(BookDTO bookDTO) {
         return modelMapper.map(bookDTO, Book.class);
