@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 import java.time.OffsetDateTime;
+import java.util.List;
 
 
 @Entity
@@ -45,6 +46,9 @@ public class Book {
 
     @Column
     public boolean isOverdue;
+
+    @OneToMany(mappedBy = "book", cascade = CascadeType.ALL)
+    private List<BorrowedBook> borrowHistory;
 
     public Book() {
     }

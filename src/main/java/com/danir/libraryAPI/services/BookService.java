@@ -2,8 +2,10 @@ package com.danir.libraryAPI.services;
 
 import com.danir.libraryAPI.dto.BookDTO;
 import com.danir.libraryAPI.models.Book;
+import com.danir.libraryAPI.models.BorrowedBook;
 import com.danir.libraryAPI.models.Person;
 import com.danir.libraryAPI.repositories.BookRepository;
+import com.danir.libraryAPI.repositories.BorrowedBookRepository;
 import com.danir.libraryAPI.repositories.PeopleRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -28,13 +30,16 @@ public class BookService {
     private final PeopleRepository peopleRepository;
     private final ModelMapper modelMapper;
     private final NotificationService notificationService;
+    private final BorrowedBookRepository borrowedBookRepository;
+
 
     @Autowired
-    public BookService(BookRepository bookRepository, PeopleRepository peopleRepository, ModelMapper modelMapper, NotificationService notificationService) {
+    public BookService(BookRepository bookRepository, PeopleRepository peopleRepository, ModelMapper modelMapper, NotificationService notificationService, BorrowedBookRepository borrowedBookRepository) {
         this.bookRepository = bookRepository;
         this.peopleRepository = peopleRepository;
         this.modelMapper = modelMapper;
         this.notificationService = notificationService;
+        this.borrowedBookRepository = borrowedBookRepository;
     }
 
     public List<Book> findAll() {
@@ -65,6 +70,7 @@ public class BookService {
     public void savePersonWithBook(Person person, Book book) {
         book.setPerson(person);
         book.setBorrowedDate(OffsetDateTime.now());
+
         bookRepository.save(book);
     }
 
@@ -77,15 +83,19 @@ public class BookService {
         if (book.getBookId() != id) {
             throw new IllegalArgumentException("The provided ID does not match the book's ID");
         }
-
-        Person person = book.getPerson(); // take actual owner of the book
+        Person person = book.getPerson();
         if (person != null) {
-            // add book to history of borrowing
-            if (!person.getBorrowedBeforeBooks().contains(book)) {
-                person.getBorrowedBeforeBooks().add(book);
-            }
-        }
+            // Добавить книгу в историю заимствований через BorrowedBook
+            BorrowedBook borrowedBook = new BorrowedBook();
+            borrowedBook.setPerson(person);
+            borrowedBook.setBook(book);
 
+            // Сохранить BorrowedBook в репозиторий
+            borrowedBookRepository.save(borrowedBook);
+
+            // Добавить запись в список истории пользователя
+            person.getBorrowedBeforeBooks().add(borrowedBook);
+        }
         book.setPerson(null);
         book.setBorrowedDate(null);
         book.setOverdue(false);

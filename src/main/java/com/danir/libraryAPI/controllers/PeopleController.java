@@ -1,7 +1,9 @@
 package com.danir.libraryAPI.controllers;
 
 import com.danir.libraryAPI.dto.PersonDTO;
+import com.danir.libraryAPI.models.BorrowedBook;
 import com.danir.libraryAPI.models.Person;
+import com.danir.libraryAPI.services.BorrowedBookService;
 import com.danir.libraryAPI.services.PeopleService;
 import com.danir.libraryAPI.util.PeopleValidator;
 import jakarta.validation.Valid;
@@ -12,6 +14,8 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.util.List;
+
 
 @Controller
 @RequestMapping("/people")
@@ -19,12 +23,13 @@ public class PeopleController {
 
     private final PeopleService peopleService;
     private final PeopleValidator validator;
-
+    private final BorrowedBookService borrowedBookService;
     private final ModelMapper modelMapper;
 
-    public PeopleController(PeopleService peopleService, PeopleValidator validator, ModelMapper modelMapper) {
+    public PeopleController(PeopleService peopleService, PeopleValidator validator, BorrowedBookService borrowedBookService, ModelMapper modelMapper) {
         this.peopleService = peopleService;
         this.validator = validator;
+        this.borrowedBookService = borrowedBookService;
         this.modelMapper = modelMapper;
     }
 
@@ -37,9 +42,10 @@ public class PeopleController {
     @GetMapping("/{id}")
     public String show(@PathVariable("id") int id, Model model) {
         Person person = peopleService.findOne(id);
+        List<BorrowedBook> borrowedBooks = borrowedBookService.findByPerson(person);
         model.addAttribute("person", person);
         model.addAttribute("bookList", person.getBookList());
-        model.addAttribute("borrowedBeforeBooks", person.getBorrowedBeforeBooks());
+        model.addAttribute("borrowedBeforeBooks", borrowedBooks);
         return "people/show";
     }
 

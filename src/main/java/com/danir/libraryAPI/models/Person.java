@@ -33,8 +33,8 @@ public class Person {
     @OneToMany(mappedBy = "person")
     private List<Book> bookList;
 
-    @OneToMany
-    private List<Book> borrowedBeforeBooks;
+    @OneToMany(mappedBy = "person", cascade = CascadeType.ALL)
+    private List<BorrowedBook> borrowedBeforeBooks;
 
     @OneToMany(mappedBy = "reservedBy")
     private List<Book> reservedBooks;
@@ -47,5 +47,4 @@ public class Person {
         this.fullName = fullName;
         this.yearOfBirth = yearOfBirth;
     }
-
 }
