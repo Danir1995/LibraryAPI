@@ -57,8 +57,12 @@ public class BookService {
 
     @Transactional
     public void update(int id, Book book) {
-        book.setBookId(id);
-        bookRepository.save(book);
+        Book existingBook = bookRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Book with id " + id + " not found"));
+
+        existingBook.setName(book.getName());
+        existingBook.setAuthor(book.getAuthor());
+        existingBook.setYear(book.getYear());
     }
 
     @Transactional
