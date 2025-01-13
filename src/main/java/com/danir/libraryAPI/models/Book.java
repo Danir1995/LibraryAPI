@@ -1,6 +1,7 @@
 package com.danir.libraryAPI.models;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -31,6 +32,7 @@ public class Book {
     @Column
     @Min(value = 1300, message = "Year can not be less than 1300")
     @NotNull(message = "fill this line")
+    @Max(value = 2025, message = "Year can not be bigger than this year")
     private int year;
 
     @Column(name = "borrowed_date")
