@@ -79,10 +79,11 @@ public class PeopleController {
     @PatchMapping("/{id}")
     public String update(@ModelAttribute("person") @Valid PersonDTO personDTO, BindingResult result,
                          @PathVariable("id") int id){
-        if (peopleService.emailExists(personDTO.getEmail())) {
+        Person person = peopleService.findOne(id);
+
+        if (peopleService.emailExists(personDTO.getEmail()) && !person.getEmail().equals(personDTO.getEmail())) {
             result.rejectValue("email", "error.person", "Email already exists");
         }
-        Person person = peopleService.findOne(id);
         if (!personDTO.getFullName().equals(person.getFullName())){
             validator.validate(personDTO, result);
         }
