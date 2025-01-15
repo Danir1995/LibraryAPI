@@ -121,14 +121,18 @@ public class BooksController {
     }
 
     @PostMapping("/assign-book")
-    public String assignBook(@RequestParam("personId") int personId, @RequestParam("bookId") int bookId) {
+    public String assignBook(@RequestParam(value = "personId", required = false) Integer personId, @RequestParam(value = "bookId", required = false) Integer bookId) {
         LOG.info("enter in assign book");
+        if (personId == null || bookId == null) {
+            LOG.warn("Missing required parameters: personId or bookId");
+            return "redirect:/books/"+bookId;
+        }
         Person person = peopleService.findOne(personId);
         Book book = bookService.findOne(bookId);
         System.out.println(book.getBookId());
 
             bookService.savePersonWithBook(person, book);
-            LOG.debug("finished assign book");
+            LOG.info("finished assign book");
 
         return "redirect:/books/"+bookId;
     }
