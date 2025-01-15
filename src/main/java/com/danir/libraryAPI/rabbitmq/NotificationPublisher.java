@@ -1,4 +1,5 @@
 package com.danir.libraryAPI.rabbitmq;
+
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Component;
@@ -13,8 +14,8 @@ public class NotificationPublisher {
         this.rabbitTemplate = rabbitTemplate;
     }
 
-    public void sendOverdueNotification(String message) {
+    public void sendOverdueNotification(NotificationMessage message) {
         rabbitTemplate.convertAndSend(RabbitMQConfig.EXCHANGE_NAME, RabbitMQConfig.ROUTING_KEY, message);
-        log.info("Message sent");
+        log.info("Message sent to RabbitMQ: {}", message);
     }
 }
