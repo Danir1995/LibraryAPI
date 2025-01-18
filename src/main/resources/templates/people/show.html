@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Show Person</title>
-    <!-- Подключение Bootstrap -->
+    <!-- Bootstrap -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 </head>
@@ -19,29 +19,31 @@
             <p th:text="'ID: ' + ${person.getPersonId()}"></p>
         </div>
         <div class="card-body">
-            <!-- Если у человека нет книг -->
+            <!-- If person has no books -->
             <div th:if="${person.getBookList().isEmpty()}" class="alert alert-info">
-                This person didn't take any book.
+                This user didn't take any book.
             </div>
 
-            <!-- Если у человека есть книги -->
-            <div th:if="${not person.getBookList().isEmpty()}">
-                <h5>Books taken by this person:</h5>
+            <!-- If person has books -->
+            <div th:if="${!person.getBookList().isEmpty()}">
+                <h5>Books taken by user:</h5>
                 <ul class="list-group">
-                    <!-- Итерируемся по списку книг -->
+                    <!-- Iteration on bookList -->
                     <li class="list-group-item d-flex justify-content-between align-items-center"
                         th:each="book : ${person.getBookList()}"
                         th:style="${book.isOverdue() ? 'color: red;' : ''}">
                         <span th:text="${book.getName() + ', ' + book.getAuthor() + ', ' + book.getYear()}"></span>
-                        <form th:method="POST" th:action="@{/books/release}" class="release-book-form">
-                            <input type="hidden" name="bookId" th:value="${book.getBookId()}">
-                            <button type="button" class="btn btn-warning btn-sm return-book-button">Return</button>
-                        </form>
+                        <div th:if="${isAdmin}">
+                            <form th:method="POST" th:action="@{/books/release}" class="release-book-form">
+                                <input type="hidden" name="bookId" th:value="${book.getBookId()}">
+                                <button type="button" class="btn btn-warning btn-sm return-book-button">Return book</button>
+                            </form>
+                        </div>
                     </li>
                 </ul>
             </div>
         </div>
-        <div th:if="${not borrowedBeforeBooks.isEmpty()}">
+        <div th:if="${!borrowedBeforeBooks.isEmpty()}">
             <h5>History of books borrowed by the user:</h5>
             <ul class="list-group">
                 <li class="list-group-item" th:each="borrowedBook : ${borrowedBeforeBooks}">
@@ -52,23 +54,27 @@
 
 
         <div class="card-footer text-center">
-            <!-- Кнопка редактирования -->
+            <!-- Button of edit -->
             <a th:href="@{/people/{id}/edit(id=${person.personId})}" class="btn btn-info me-2">Edit</a>
-            <!-- Удаление -->
-            <form th:method="DELETE" th:action="@{/people/{id}(id=${person.getPersonId()})}" class="d-inline">
-                <button type="submit" class="btn btn-danger">Delete</button>
-            </form>
-            <a th:href="@{/people}" class="btn btn-secondary ms-2">Back to People List</a>
+            <div th:if="${isAdmin}">
+                <!-- Deletion -->
+                <form th:method="DELETE" th:action="@{/people/{id}(id=${person.getPersonId()})}" class="d-inline">
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                </form>
+            </div>
+            <a th:href="@{/books}" class="btn btn-secondary ms-2">Back to Library books</a>
+            <a th:href="@{/logout}" class="btn btn-secondary ms-2">LogOut</a>
+
         </div>
     </div>
 
-    <!-- Ошибка при удалении -->
+    <!-- Error during deletion -->
     <div class="mt-3" th:if="${errorMessage}">
         <div class="alert alert-danger" th:text="${errorMessage}"></div>
     </div>
 </div>
 
-<!-- Подключение Bootstrap JS -->
+<!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>

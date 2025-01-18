@@ -11,12 +11,15 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.security.Principal;
 import java.util.List;
 
 
@@ -37,7 +40,10 @@ public class BooksController {
     public String index(@RequestParam(required = false, defaultValue = "0") int page,
                         @RequestParam(required = false, defaultValue = "5") int size,
                         @RequestParam(required = false, defaultValue = "false") boolean onlyAvailable,
-                        Model model){
+                        Model model, Principal principal){
+        String username = principal.getName();
+        Person person = peopleService.findByUsername(username);
+        boolean isAdmin = hasRole();
 
         Page<Book> bookPage;
         if (onlyAvailable) {
@@ -56,6 +62,8 @@ public class BooksController {
                 })
                 .toList();
 
+        model.addAttribute("currentUser", person);
+        model.addAttribute("isAdmin", isAdmin);
         model.addAttribute("books", bookDTOList);
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", bookPage.getTotalPages());
@@ -64,12 +72,17 @@ public class BooksController {
     }
 
     @GetMapping("/{id}")
-    public String show(@PathVariable("id")int id, Model model){
-
+    public String show(@PathVariable("id")int id, Model model, Principal principal){
         BookDTO bookDTO = bookService.getBookDetails(id);
 
+        String username = principal.getName();
+        Person person = peopleService.findByUsername(username);
+        boolean isAdmin = hasRole();
+
+        model.addAttribute("currentUser", person);
         model.addAttribute("book", bookDTO);
-        model.addAttribute("people", peopleService.findAll());
+        model.addAttribute("isAdmin", isAdmin);
+        model.addAttribute("people", isAdmin ? peopleService.findAll() : null);
          model.addAttribute("isOverdue", bookDTO.isOverdue());
         model.addAttribute("isOccupied", bookDTO.getPerson_name() != null);
         model.addAttribute("isReserved", bookDTO.getReserved_by_name() != null);
@@ -78,11 +91,13 @@ public class BooksController {
     }
 
     @GetMapping("/newBook")
-    public String newPerson(@ModelAttribute("book") BookDTO bookDTO){
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public String newBook(@ModelAttribute("book") BookDTO bookDTO){
         return "book/newBook";
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public String createBook(@ModelAttribute("book") @Valid BookDTO bookDTO,
                              BindingResult bindingResult){
 
@@ -95,6 +110,7 @@ public class BooksController {
     }
 
     @GetMapping("/{id}/editBook")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public String edit(@PathVariable("id") int id, Model model){
         Book book = bookService.findOne(id);
         BookDTO bookDTO = bookService.convertToBookDTO(book);
@@ -103,6 +119,7 @@ public class BooksController {
     }
 
     @PatchMapping("/{id}")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public String updateBook(@ModelAttribute("book") @Valid BookDTO bookDTO, BindingResult bindingResult,
                              @PathVariable("id") int id){
         if (bindingResult.hasErrors()){
@@ -114,6 +131,7 @@ public class BooksController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public String deleteBook(@PathVariable("id")int id){
         LOG.info("deleting book");
         bookService.delete(id);
@@ -121,6 +139,7 @@ public class BooksController {
     }
 
     @PostMapping("/assign-book")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public String assignBook(@RequestParam(value = "personId", required = false) Integer personId, @RequestParam(value = "bookId", required = false) Integer bookId) {
         LOG.info("enter in assign book");
         if (personId == null || bookId == null) {
@@ -138,6 +157,7 @@ public class BooksController {
     }
 
     @PostMapping("/release")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public String release(@RequestParam("bookId") int bookId){
         Book book = bookService.findOne(bookId);
         bookService.release(book, bookId);
@@ -175,5 +195,11 @@ public class BooksController {
         bookService.cancelReservation(bookId);
         model.addAttribute("message", "Reservation cancelled successfully");
         return "redirect:/books/" + bookId;
+    }
+
+    protected static boolean hasRole() {
+        return SecurityContextHolder.getContext().getAuthentication()
+                .getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
     }
 }

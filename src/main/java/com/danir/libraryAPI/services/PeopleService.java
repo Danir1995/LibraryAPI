@@ -1,8 +1,12 @@
 package com.danir.libraryAPI.services;
 
+import com.danir.libraryAPI.models.Book;
 import com.danir.libraryAPI.models.Person;
+import com.danir.libraryAPI.repositories.BookRepository;
 import com.danir.libraryAPI.repositories.PeopleRepository;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,10 +18,12 @@ import java.util.Optional;
 public class PeopleService {
 
     private final PeopleRepository peopleRepository;
+    private final BookRepository bookRepository;
 
     @Autowired
-    public PeopleService(PeopleRepository peopleRepository) {
+    public PeopleService(PeopleRepository peopleRepository, BookRepository bookRepository) {
         this.peopleRepository = peopleRepository;
+        this.bookRepository = bookRepository;
     }
 
     public List<Person> findAll(){
@@ -27,6 +33,11 @@ public class PeopleService {
     public Person findOne(int id){
         Optional<Person> person = peopleRepository.findById(id);
         return person.orElse(null);
+    }
+
+    public Person findByUsername(String username) {
+        return peopleRepository.findByFullNameIgnoreCase(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
     }
 
     @Transactional
@@ -42,6 +53,14 @@ public class PeopleService {
 
     @Transactional
     public void delete(int id){
+        Person person = peopleRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Person not found"));
+
+        for (Book book : person.getReservedBooks()) {
+            book.setReservedBy(null);
+            bookRepository.save(book); // save changes
+        }
+
         peopleRepository.deleteById(id);
     }
 

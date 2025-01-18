@@ -8,6 +8,7 @@ import com.danir.libraryAPI.services.PeopleService;
 import com.danir.libraryAPI.util.PeopleValidator;
 import jakarta.validation.Valid;
 import org.modelmapper.ModelMapper;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -15,6 +16,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
+
+import static com.danir.libraryAPI.controllers.BooksController.hasRole;
 
 
 @Controller
@@ -34,6 +37,7 @@ public class PeopleController {
     }
 
     @GetMapping("")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public String index(Model model){
         model.addAttribute("people", peopleService.findAll());
         return "people/index";
@@ -41,8 +45,10 @@ public class PeopleController {
 
     @GetMapping("/{id}")
     public String show(@PathVariable("id") int id, Model model) {
+        boolean isAdmin = hasRole();
         Person person = peopleService.findOne(id);
         List<BorrowedBook> borrowedBooks = borrowedBookService.findByPerson(person);
+        model.addAttribute("isAdmin", isAdmin);
         model.addAttribute("person", person);
         model.addAttribute("bookList", person.getBookList());
         model.addAttribute("borrowedBeforeBooks", borrowedBooks);
@@ -50,11 +56,13 @@ public class PeopleController {
     }
 
     @GetMapping("/new")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public String newPerson(@ModelAttribute("person") PersonDTO personDTO){
         return "people/new";
     }
 
     @PostMapping()
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public String create(@ModelAttribute("person") @Valid PersonDTO personDTO,
                          BindingResult result) {
         if (peopleService.emailExists(personDTO.getEmail())) {
@@ -92,10 +100,11 @@ public class PeopleController {
             return "people/edit";
         }
         peopleService.update(id, convertToPerson(personDTO));
-        return "redirect:/people";
+        return "redirect:/people/" + id;
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public String delete(@PathVariable("id") int id, RedirectAttributes redirectAttributes) {
         Person person = peopleService.findOne(id);
 

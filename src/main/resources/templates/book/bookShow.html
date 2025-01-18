@@ -16,6 +16,10 @@
         <div class="card-body">
             <p><strong>Author:</strong> <span th:text="${book.getAuthor()}"></span></p>
             <p><strong>Year:</strong> <span th:text="${book.getYear()}"></span></p>
+        </div>
+
+        <!-- Администраторские действия -->
+        <div th:if="${isAdmin}">
             <p th:if="${isOverdue}" class="text-danger">THIS BOOK IS OVERDUE</p>
 
             <div th:if="${isOccupied}" class="mb-4">
@@ -25,20 +29,6 @@
                     <input type="hidden" name="bookId" th:value="${book.getBookId()}">
                     <button type="submit" class="btn btn-danger">Return Book</button>
                 </form>
-                <form th:method="POST" th:action="@{/books/{bookId}/reserve(bookId=${book.getBookId()})}">
-                    <div class="mb-3">
-                        <label for="personId" class="form-label">Reserve for:</label>
-                        <select id="personId" name="personId" class="form-select" required>
-                            <option value="" disabled selected>Choose person</option>
-                            <option th:each="person : ${people}"
-                                    th:if="${person.fullName != book.person_name}"
-                                    th:value="${person.personId}"
-                                    th:text="${person.getFullName()}"></option>
-                        </select>
-                    </div>
-                    <input type="hidden" name="bookId" th:value="${book.getBookId()}">
-                    <button type="submit" class="btn btn-warning">Reserve Book</button>
-                </form>
             </div>
 
             <div th:if="${isReserved}" class="mb-4">
@@ -46,6 +36,22 @@
                 <p><strong>Reserved by:</strong> <span th:text="${book.getReserved_by_name()}"></span></p>
                 <form th:method="DELETE" th:action="@{/books/{bookId}/cancel-reservation(bookId=${book.getBookId()})}">
                     <button type="submit" class="btn btn-secondary">Cancel Reservation</button>
+                </form>
+            </div>
+
+            <div th:if="${!isReserved}" class="mb-4">
+                <h5>Reserve for User</h5>
+                <form th:method="POST" th:action="@{/books/{bookId}/reserve(bookId=${book.getBookId()})}">
+                    <div class="mb-3">
+                        <label for="personId" class="form-label">Reserve for:</label>
+                        <select id="personId" name="personId" class="form-select" required>
+                            <option value="" disabled selected>Choose person</option>
+                            <option th:each="person : ${people}"
+                                    th:value="${person.personId}"
+                                    th:text="${person.getFullName()}"></option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-warning">Reserve Book</button>
                 </form>
             </div>
 
@@ -67,15 +73,33 @@
                 </form>
             </div>
 
-            <div th:if="${errorMessage != null}" class="alert alert-danger" th:text="${errorMessage}"></div>
-            <div th:if="${message != null}" class="alert alert-success" th:text="${message}"></div>
-
             <hr>
 
             <div class="d-flex justify-content-between">
                 <a th:href="@{/books/{id}/editBook(id=${book.getBookId()})}" class="btn btn-outline-primary">Edit Book</a>
                 <form th:method="DELETE" th:action="@{/books/{id}(id=${book.getBookId()})}">
                     <button type="submit" class="btn btn-danger">Delete Book</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Actions for user -->
+        <div th:if="${!isAdmin}">
+            <p class="text-success" th:if="${!isOccupied && !isReserved}">This book is available for reservation.</p>
+            <p class="text-warning" th:if="${isReserved && !book.getReserved_by_name().equals(currentUser.fullName)}">This book is reserved by someone... </p>
+            <p class="text-warning" th:if="${isReserved && book.getReserved_by_name().equals(currentUser.fullName)}">This book is reserved by you: <span th:text="${book.getReserved_by_name()}"></span> :)</p>
+            <p class="text-danger" th:if="${isOccupied}">This book is currently occupied by: <span th:text="${book.getPerson_name()}"></span></p>
+
+            <div th:if="${!isReserved && !isOccupied}">
+                <form th:method="POST" th:action="@{/books/{bookId}/reserve(bookId=${book.getBookId()})}">
+                    <input type="hidden" name="personId" th:value="${currentUser.personId}">
+                    <button type="submit" class="btn btn-warning">Reserve Book for Yourself</button>
+                </form>
+            </div>
+            <div th:if="${isReserved && book.getReserved_by_name().equals(currentUser.fullName)}" class="mb-4">
+                <h5>Reservation</h5>
+                <form th:method="DELETE" th:action="@{/books/{bookId}/cancel-reservation(bookId=${book.getBookId()})}">
+                    <button type="submit" class="btn btn-secondary">Cancel Reservation</button>
                 </form>
             </div>
         </div>

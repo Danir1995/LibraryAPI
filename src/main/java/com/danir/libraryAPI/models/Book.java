@@ -47,7 +47,7 @@ public class Book {
     private Person reservedBy;
 
     @Column
-    public boolean isOverdue;
+    private boolean isOverdue;
 
     @OneToMany(mappedBy = "book", cascade = CascadeType.ALL)
     private List<BorrowedBook> borrowHistory;
