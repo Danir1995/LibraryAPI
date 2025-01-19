@@ -34,6 +34,13 @@
                     <div class="text-danger" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
                 </div>
 
+                <div class="mb-3">
+                    <label for="password" class="form-label">Password:</label>
+                    <input type="password" id="password" th:field="*{password}" class="form-control" required>
+                    <div class="text-danger" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></div>
+                </div>
+
+
                 <button type="submit" class="btn btn-success">Create</button>
                 <a th:href="@{/people}" class="btn btn-secondary ms-2">Cancel</a>
             </form>

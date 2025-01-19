@@ -5,6 +5,7 @@ import com.danir.libraryAPI.models.Role;
 import com.danir.libraryAPI.repositories.PeopleRepository;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
@@ -43,6 +44,7 @@ public class SecurityConfig{
     }
 
     @Bean
+    @Lazy
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
@@ -56,7 +58,7 @@ public class SecurityConfig{
                 admin.setFullName("Admin");
                 admin.setEmail("admin@example.com");
                 admin.setYearOfBirth(1995);
-                admin.setPassword(new BCryptPasswordEncoder().encode("password")); // Encrypt password
+                admin.setPassword(passwordEncoder().encode("password")); // Encrypt password
                 admin.getRoles().add(Role.ROLE_ADMIN);
                 peopleRepository.save(admin); // Save admin in db
             }
@@ -66,7 +68,7 @@ public class SecurityConfig{
                 user.setFullName("Bambi");
                 user.setEmail("user@example.com");
                 user.setYearOfBirth(1995);
-                user.setPassword(new BCryptPasswordEncoder().encode("password"));
+                user.setPassword(passwordEncoder().encode("password"));
                 user.getRoles().add(Role.ROLE_USER);
                 peopleRepository.save(user);
             }

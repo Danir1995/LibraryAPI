@@ -1,7 +1,10 @@
 package com.danir.libraryAPI.dto;
-import jakarta.persistence.Column;
+import com.danir.libraryAPI.models.Role;
 import jakarta.validation.constraints.*;
 import lombok.Data;
+
+import java.util.HashSet;
+import java.util.Set;
 
 @Data
 public class PersonDTO {
@@ -10,7 +13,6 @@ public class PersonDTO {
     @NotNull(message = "full name can not be empty")
     private String fullName;
 
-    @Column(name = "year_of_birth")
     @Min(value = 1920, message = "Year can not be less than 1920")
     @Max(value = 2025, message = "Year of birth cannot be in the future")
     @NotNull(message = "please provide year")
@@ -19,4 +21,8 @@ public class PersonDTO {
     @Email(message = "Invalid email address")
     @NotBlank(message = "Email is required")
     private String email;
+
+    private Set<Role> roles = new HashSet<>();
+
+    private String password;
 }

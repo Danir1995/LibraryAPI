@@ -7,6 +7,7 @@ import com.danir.libraryAPI.services.BorrowedBookService;
 import com.danir.libraryAPI.services.PeopleService;
 import com.danir.libraryAPI.util.PeopleValidator;
 import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
@@ -15,11 +16,13 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.security.Principal;
 import java.util.List;
 
 import static com.danir.libraryAPI.controllers.BooksController.hasRole;
 
 
+@Slf4j
 @Controller
 @RequestMapping("/people")
 public class PeopleController {
@@ -79,8 +82,13 @@ public class PeopleController {
     }
 
     @GetMapping("/{id}/edit")
-    public String edit(@PathVariable("id") int id, Model model){
-       model.addAttribute("person", peopleService.findOne(id));
+    public String edit(@PathVariable("id") int id, Model model, Principal principal){
+        // Check if user is editing his profile
+        Person person = peopleService.findOne(id);
+        boolean isSelf = person.getFullName().equals(principal.getName());
+
+        model.addAttribute("person", peopleService.findOne(id));
+        model.addAttribute("isSelf", isSelf);
         return "people/edit";
     }
 
@@ -96,6 +104,14 @@ public class PeopleController {
             validator.validate(personDTO, result);
         }
 
+        if (
+                personDTO.getPassword() != null &&
+                personDTO.getPassword().length() < 6 &&
+                !personDTO.getPassword().isEmpty()
+        ) {
+            result.rejectValue("password", "error.person", "Password must be at least 6 characters long");
+        }
+
         if (result.hasErrors()){
             return "people/edit";
         }
@@ -104,13 +120,12 @@ public class PeopleController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public String delete(@PathVariable("id") int id, RedirectAttributes redirectAttributes) {
         Person person = peopleService.findOne(id);
 
         // Check if person has assigned books
         if (!person.getBookList().isEmpty()) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Cannot delete person before receiving books");
+            redirectAttributes.addFlashAttribute("errorMessage", "Cannot delete user before receiving books");
             return "redirect:/people/" + id;
         }
         peopleService.delete(id);

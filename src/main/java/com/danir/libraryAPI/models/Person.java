@@ -40,7 +40,7 @@ public class Person implements UserDetails {
     @NotNull(message = "please provide year")
     private Integer yearOfBirth;
 
-    @Column(nullable = false)
+    @Column
     private String password;
 
     @OneToMany(mappedBy = "person")

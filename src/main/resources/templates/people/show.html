@@ -56,12 +56,10 @@
         <div class="card-footer text-center">
             <!-- Button of edit -->
             <a th:href="@{/people/{id}/edit(id=${person.personId})}" class="btn btn-info me-2">Edit</a>
-            <div th:if="${isAdmin}">
                 <!-- Deletion -->
                 <form th:method="DELETE" th:action="@{/people/{id}(id=${person.getPersonId()})}" class="d-inline">
                     <button type="submit" class="btn btn-danger">Delete</button>
                 </form>
-            </div>
             <a th:href="@{/books}" class="btn btn-secondary ms-2">Back to Library books</a>
             <a th:href="@{/logout}" class="btn btn-secondary ms-2">LogOut</a>
 
