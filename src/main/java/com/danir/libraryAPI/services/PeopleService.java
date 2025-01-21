@@ -2,6 +2,7 @@ package com.danir.libraryAPI.services;
 
 import com.danir.libraryAPI.models.Book;
 import com.danir.libraryAPI.models.Person;
+import com.danir.libraryAPI.models.Role;
 import com.danir.libraryAPI.repositories.BookRepository;
 import com.danir.libraryAPI.repositories.PeopleRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -46,6 +47,7 @@ public class PeopleService {
     @Transactional
     public void save(Person person){
         person.setPassword(passwordEncoder.encode(person.getPassword()));
+        person.getRoles().add(Role.ROLE_USER);
         peopleRepository.save(person);
     }
 

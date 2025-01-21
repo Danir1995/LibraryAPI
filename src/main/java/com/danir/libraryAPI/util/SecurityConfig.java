@@ -11,6 +11,7 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -21,22 +22,30 @@ import org.springframework.boot.CommandLineRunner;
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class SecurityConfig{
 
-     @Bean
+    @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        return http
+        http
+                .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/resources/**", "/css/**").permitAll() // access to static resources
-                        .anyRequest().authenticated() // All queries needs authentication
+                        .requestMatchers("/register", "/login", "/css/**").permitAll()
+                        .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
-                        .defaultSuccessUrl("/books", true) // redirect after successful login
-                )
+                        .loginPage("/login")
+                        .successHandler((request, response, authentication) -> {
+                            // Receive current user
+                            PersonDetails personDetails = (PersonDetails) authentication.getPrincipal();
+                            int userId = personDetails.getPerson().getPersonId();
+                            response.sendRedirect("/people/" + userId); //redirect to user page
+                        }))
                 .logout(logout -> logout
-                        .logoutUrl("/logout") // URL for logout
-                        .logoutSuccessUrl("/login") // redirect after successful logout
-                )
-                .build();
+                        .logoutUrl("/logout")
+                        .logoutSuccessUrl("/login")
+                );
+
+        return http.build();
     }
+
 
     @Bean
     public AuthenticationManager authManager(AuthenticationConfiguration config) throws Exception {
