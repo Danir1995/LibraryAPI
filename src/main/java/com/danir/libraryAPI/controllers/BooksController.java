@@ -73,6 +73,7 @@ public class BooksController {
 
     @GetMapping("/{id}")
     public String show(@PathVariable("id")int id, Model model, Principal principal){
+
         BookDTO bookDTO = bookService.getBookDetails(id);
 
         String username = principal.getName();

@@ -3,6 +3,7 @@ package com.danir.libraryAPI.controllers;
 import com.danir.libraryAPI.dto.PersonDTO;
 import com.danir.libraryAPI.models.BorrowedBook;
 import com.danir.libraryAPI.models.Person;
+import com.danir.libraryAPI.models.Role;
 import com.danir.libraryAPI.services.BorrowedBookService;
 import com.danir.libraryAPI.services.PeopleService;
 import com.danir.libraryAPI.util.PeopleValidator;
@@ -51,7 +52,9 @@ public class PeopleController {
         boolean isAdmin = hasRole();
         Person person = peopleService.findOne(id);
         List<BorrowedBook> borrowedBooks = borrowedBookService.findByPerson(person);
+
         model.addAttribute("isAdmin", isAdmin);
+        model.addAttribute("thisUserIsAdmin", person.getRoles().contains(Role.ROLE_ADMIN));
         model.addAttribute("person", person);
         model.addAttribute("bookList", person.getBookList());
         model.addAttribute("borrowedBeforeBooks", borrowedBooks);
@@ -68,12 +71,18 @@ public class PeopleController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public String create(@ModelAttribute("person") @Valid PersonDTO personDTO,
                          BindingResult result) {
+        if (result.hasErrors()){
+            return "people/new";
+        }
+
         if (peopleService.emailExists(personDTO.getEmail())) {
             result.rejectValue("email", "error.person", "Email already exists");
         }
 
         validator.validate(personDTO, result);
-        if (result.hasErrors()){
+
+        if (personDTO.getPassword() == null || personDTO.getPassword().length() < 6){
+            result.rejectValue("password", "error.person", "Password must be at least 6 characters long");
             return "people/new";
         }
 
@@ -95,26 +104,30 @@ public class PeopleController {
     @PatchMapping("/{id}")
     public String update(@ModelAttribute("person") @Valid PersonDTO personDTO, BindingResult result,
                          @PathVariable("id") int id){
+        if (result.hasErrors()){
+            return "people/edit";
+        }
+
         Person person = peopleService.findOne(id);
 
         if (peopleService.emailExists(personDTO.getEmail()) && !person.getEmail().equals(personDTO.getEmail())) {
             result.rejectValue("email", "error.person", "Email already exists");
         }
+
         if (!personDTO.getFullName().equals(person.getFullName())){
             validator.validate(personDTO, result);
         }
 
         if (
                 personDTO.getPassword() != null &&
-                personDTO.getPassword().length() < 6 &&
-                !personDTO.getPassword().isEmpty()
+                        personDTO.getPassword().length() < 6 &&
+                        !personDTO.getPassword().isEmpty()
         ) {
-            result.rejectValue("password", "error.person", "Password must be at least 6 characters long");
-        }
 
-        if (result.hasErrors()){
+            result.rejectValue("password", "error.person", "Password must be at least 6 characters long");
             return "people/edit";
         }
+
         peopleService.update(id, convertToPerson(personDTO));
         return "redirect:/people/" + id;
     }

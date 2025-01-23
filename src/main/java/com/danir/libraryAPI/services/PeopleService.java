@@ -47,7 +47,9 @@ public class PeopleService {
     @Transactional
     public void save(Person person){
         person.setPassword(passwordEncoder.encode(person.getPassword()));
-        person.getRoles().add(Role.ROLE_USER);
+        if (!person.getRoles().contains(Role.ROLE_USER)) {
+            person.getRoles().add(Role.ROLE_USER);
+        }
         peopleRepository.save(person);
     }
 
@@ -58,7 +60,7 @@ public class PeopleService {
                 .orElseThrow(() -> new RuntimeException("Person not found"));
 
         // If password didn't change
-        if (person.getPassword() == null || person.getPassword().isEmpty()) {
+        if (person.getPassword() == null || person.getPassword().isEmpty() || person.getPassword().equals(existingPerson.getPassword())) {
             person.setPassword(existingPerson.getPassword());
         } else {
             //if password changed - encrypt it

@@ -1,26 +1,31 @@
 package com.danir.libraryAPI.controllers;
 
+import com.danir.libraryAPI.dto.PersonDTO;
 import com.danir.libraryAPI.models.Person;
 import com.danir.libraryAPI.models.Role;
-import com.danir.libraryAPI.repositories.PeopleRepository;
+import com.danir.libraryAPI.services.PeopleService;
 import jakarta.validation.Valid;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+
+import java.util.Optional;
+
 
 @Controller
 public class AuthController {
 
-    private final PeopleRepository peopleRepository;
-    private final PasswordEncoder passwordEncoder;
+    private final PeopleService peopleService;
+    private final ModelMapper modelMapper;
 
-    public AuthController(PeopleRepository peopleRepository, PasswordEncoder passwordEncoder) {
-        this.peopleRepository = peopleRepository;
-        this.passwordEncoder = passwordEncoder;
+    public AuthController(PeopleService peopleService, ModelMapper modelMapper) {
+        this.peopleService = peopleService;
+        this.modelMapper = modelMapper;
     }
 
     @GetMapping("/login")
@@ -35,20 +40,44 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public String registerUser(@ModelAttribute("person") @Valid Person person, BindingResult bindingResult) {
+    public String registerUser(@ModelAttribute("person") @Valid PersonDTO personDTO, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             return "registration";
         }
 
-        if (peopleRepository.findByEmail(person.getEmail()).isPresent()) {
+        if (peopleService.emailExists(personDTO.getEmail())) {
             bindingResult.rejectValue("email", "error.person", "Email already exists!");
             return "registration";
         }
 
-        person.setPassword(passwordEncoder.encode(person.getPassword()));
-        person.getRoles().add(Role.ROLE_USER);
-        peopleRepository.save(person);
+        if (personDTO.getPassword() == null || personDTO.getPassword().length() < 6){
+            bindingResult.rejectValue("password", "error.person", "Password must be at least 6 characters long");
+            return "registration";
+        }
+
+        peopleService.save(convertToPerson(personDTO));
 
         return "redirect:/login";
     }
+
+    @PostMapping("/people/{id}/toggle-admin")
+    public String toggleAdmin(@PathVariable("id") int id) {
+        Optional<Person> personOptional = Optional.of((peopleService.findOne(id)));
+        Person person = personOptional.get();
+
+        if (person.getRoles().contains(Role.ROLE_ADMIN)) {
+            person.getRoles().remove(Role.ROLE_ADMIN);
+        } else {
+            person.getRoles().add(Role.ROLE_ADMIN);
+        }
+
+        peopleService.update(id, person);
+
+        return "redirect:/people/" + id;
+    }
+
+    private Person convertToPerson(PersonDTO personDTO){
+        return modelMapper.map(personDTO, Person.class);
+    }
+
 }
