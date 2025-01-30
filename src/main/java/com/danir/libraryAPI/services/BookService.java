@@ -5,7 +5,6 @@ import com.danir.libraryAPI.models.Book;
 import com.danir.libraryAPI.models.BorrowedBook;
 import com.danir.libraryAPI.models.Person;
 import com.danir.libraryAPI.repositories.BookRepository;
-import com.danir.libraryAPI.repositories.BorrowedBookRepository;
 import com.danir.libraryAPI.repositories.PeopleRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -17,6 +16,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.util.List;
 
@@ -30,16 +30,15 @@ public class BookService {
     private final PeopleRepository peopleRepository;
     private final ModelMapper modelMapper;
     private final NotificationService notificationService;
-    private final BorrowedBookRepository borrowedBookRepository;
-
+    private final BorrowedBookService borrowedBookService;
 
     @Autowired
-    public BookService(BookRepository bookRepository, PeopleRepository peopleRepository, ModelMapper modelMapper, NotificationService notificationService, BorrowedBookRepository borrowedBookRepository) {
+    public BookService(BookRepository bookRepository, PeopleRepository peopleRepository, ModelMapper modelMapper, NotificationService notificationService, BorrowedBookService borrowedBookService) {
         this.bookRepository = bookRepository;
         this.peopleRepository = peopleRepository;
         this.modelMapper = modelMapper;
         this.notificationService = notificationService;
-        this.borrowedBookRepository = borrowedBookRepository;
+        this.borrowedBookService = borrowedBookService;
     }
 
     public List<Book> findAll() {
@@ -89,20 +88,22 @@ public class BookService {
         }
         Person person = book.getPerson();
         if (person != null) {
-            // Добавить книгу в историю заимствований через BorrowedBook
+            // add book like borrowed before
             BorrowedBook borrowedBook = new BorrowedBook();
             borrowedBook.setPerson(person);
             borrowedBook.setBook(book);
 
-            // Сохранить BorrowedBook в репозиторий
-            borrowedBookRepository.save(borrowedBook);
+            // save the borrowed book to the repository
+            borrowedBookService.save(borrowedBook);
 
-            // Добавить запись в список истории пользователя
+            // add book to user's borrowing history
             person.getBorrowedBeforeBooks().add(borrowedBook);
         }
         book.setPerson(null);
         book.setBorrowedDate(null);
         book.setOverdue(false);
+        book.setIsDebtPaid(false);
+        book.setPaymentDate(null);
 
         // save changes
         bookRepository.save(book);
@@ -174,6 +175,38 @@ public class BookService {
         return date != null && date.isBefore(OffsetDateTime.now().minusDays(10));
     }
 
+    @Transactional
+    public double calculateDebt(Book book) {
+        if (book.getIsDebtPaid() == null){
+            return 0.0;
+        }
+        if (Boolean.TRUE.equals(book.getIsDebtPaid())) {
+            return 0.0; // Если долг уже оплачен, возвращаем 0
+        }
+
+        OffsetDateTime borrowedDate = book.getBorrowedDate();
+
+        if (borrowedDate == null || borrowedDate.isAfter(OffsetDateTime.now())) {
+            throw new IllegalArgumentException("Invalid borrowed date.");
+        }
+
+        long overdueDays = Duration.between(borrowedDate, OffsetDateTime.now()).toDays();
+        double amount;
+
+        amount = overdueDays > 10
+                ? 10 + (overdueDays - 10) * 5.0
+                : overdueDays * 1.0;
+        book.setDebt(amount);
+
+        return amount;
+    }
+
+    @Transactional
+    public double calculateTotalDebt(Person person) {
+        return person.getBookList().stream()
+                .mapToDouble(this::calculateDebt)
+                .sum();
+    }
 
     public Book convertToBook(BookDTO bookDTO) {
         return modelMapper.map(bookDTO, Book.class);

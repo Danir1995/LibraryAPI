@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 @Transactional(readOnly = true)
@@ -20,18 +21,16 @@ public class BorrowedBookService {
         this.borrowedBookRepository = borrowedBookRepository;
     }
 
-
     public List<BorrowedBook> findAll() {
         return borrowedBookRepository.findAll();
     }
-
 
     public Optional<BorrowedBook> findById(long id) {
         return borrowedBookRepository.findById(id);
     }
 
     //receiving all borrowed books of person
-    public List<BorrowedBook> findByPerson(Person person) {
+    public Set<BorrowedBook> findByPerson(Person person) {
         return borrowedBookRepository.findByPerson(person);
     }
 

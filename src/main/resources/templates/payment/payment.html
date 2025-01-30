@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Payment</title>
+    <script src="https://js.stripe.com/v3/"></script>
+</head>
+<body>
+<h1>Pay for your book</h1>
+<p>Amount: €<span th:text="${amount}"></span></p>
+
+<!-- Контейнер для ввода карты -->
+<div id="card-element"></div>
+<!-- Сообщение об ошибке -->
+<div id="card-errors" role="alert" style="color: red;"></div>
+
+<!-- Форма для отправки результата платежа на сервер -->
+<form id="payment-form" th:action="@{/payment/confirm}" method="post">
+    <input type="hidden" id="payment-intent-id" name="paymentIntentId">
+    <input type="hidden" name="bookId" th:value="${bookId}">
+    <button type="submit" id="pay-button">Pay Now</button>
+</form>
+
+<script>
+    const stripe = Stripe("[[${publishableKey}]]");
+    const clientSecret = "[[${clientSecret}]]";
+
+    const elements = stripe.elements();
+    const cardElement = elements.create("card");
+    cardElement.mount("#card-element");
+
+    document.getElementById("payment-form").addEventListener("submit", async (event) => {
+        event.preventDefault(); // Останавливаем стандартное поведение формы
+
+        const { error, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
+            payment_method: { card: cardElement }
+        });
+
+        if (error) {
+            document.getElementById("card-errors").innerText = error.message;
+        } else {
+            document.getElementById("payment-intent-id").value = paymentIntent.id; // Передаём ID платежа в форму
+            event.target.submit(); // Отправляем форму на сервер
+        }
+    });
+</script>
+
+</body>
+</html>

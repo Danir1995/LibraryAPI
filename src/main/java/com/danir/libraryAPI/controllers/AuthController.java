@@ -30,29 +30,29 @@ public class AuthController {
 
     @GetMapping("/login")
     public String login(){
-        return "login";
+        return "auth/login";
     }
 
     @GetMapping("/register")
     public String showRegistrationForm(Model model) {
         model.addAttribute("person", new Person());
-        return "registration";
+        return "auth/registration";
     }
 
     @PostMapping("/register")
     public String registerUser(@ModelAttribute("person") @Valid PersonDTO personDTO, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
-            return "registration";
+            return "auth/registration";
         }
 
         if (peopleService.emailExists(personDTO.getEmail())) {
             bindingResult.rejectValue("email", "error.person", "Email already exists!");
-            return "registration";
+            return "auth/registration";
         }
 
         if (personDTO.getPassword() == null || personDTO.getPassword().length() < 6){
             bindingResult.rejectValue("password", "error.person", "Password must be at least 6 characters long");
-            return "registration";
+            return "auth/registration";
         }
 
         peopleService.save(convertToPerson(personDTO));

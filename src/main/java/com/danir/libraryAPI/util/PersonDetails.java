@@ -24,7 +24,6 @@ public class PersonDetails implements UserDetails {
                 .toList();
     }
 
-
     @Override
     public String getPassword() {
         return person.getPassword();
@@ -33,6 +32,10 @@ public class PersonDetails implements UserDetails {
     @Override
     public String getUsername() {
         return person.getUsername();
+    }
+
+    public Person getPerson(){
+        return person;
     }
 
     @Override

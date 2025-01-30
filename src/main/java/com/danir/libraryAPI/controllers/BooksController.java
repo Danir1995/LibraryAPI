@@ -30,7 +30,6 @@ public class BooksController {
     private final BookService bookService;
     private final PeopleService peopleService;
 
-
     public BooksController(BookService bookService, PeopleService peopleService) {
         this.bookService = bookService;
         this.peopleService = peopleService;
@@ -38,7 +37,7 @@ public class BooksController {
 
     @GetMapping
     public String index(@RequestParam(required = false, defaultValue = "0") int page,
-                        @RequestParam(required = false, defaultValue = "5") int size,
+                        @RequestParam(required = false, defaultValue = "20") int size,
                         @RequestParam(required = false, defaultValue = "false") boolean onlyAvailable,
                         Model model, Principal principal){
         String username = principal.getName();
@@ -62,7 +61,7 @@ public class BooksController {
                 })
                 .toList();
 
-        model.addAttribute("currentUser", person);
+        model.addAttribute("currentUser", person.getPersonId());
         model.addAttribute("isAdmin", isAdmin);
         model.addAttribute("books", bookDTOList);
         model.addAttribute("currentPage", page);
@@ -84,7 +83,7 @@ public class BooksController {
         model.addAttribute("book", bookDTO);
         model.addAttribute("isAdmin", isAdmin);
         model.addAttribute("people", isAdmin ? peopleService.findAll() : null);
-         model.addAttribute("isOverdue", bookDTO.isOverdue());
+        model.addAttribute("isOverdue", bookDTO.isOverdue());
         model.addAttribute("isOccupied", bookDTO.getPerson_name() != null);
         model.addAttribute("isReserved", bookDTO.getReserved_by_name() != null);
 

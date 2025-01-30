@@ -43,7 +43,7 @@ public class Person implements UserDetails {
     @Column
     private String password;
 
-    @OneToMany(mappedBy = "person")
+    @OneToMany(mappedBy = "person", fetch = FetchType.LAZY)
     private List<Book> bookList;
 
     @OneToMany(mappedBy = "person", cascade = CascadeType.ALL)

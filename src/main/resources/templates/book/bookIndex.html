@@ -10,7 +10,13 @@
 <div class="container mt-5">
     <div class="card">
         <div class="card-header bg-primary text-white">
-            <h2>List of Books</h2>
+            <h1>List of Books</h1>
+            <h4>Important Notice:
+                Upon borrowing a book, a fee of €1 per day will apply.
+                If the book is not returned within 10 days,
+                the fee will increase to €5 per day.</h4>
+            <h5>After payment, you have 24 hours to return the book.
+                If the book is not returned within this period, the daily fee will be renewed.</h5>
         </div>
         <div class="card-body">
             <div class="mb-3">
@@ -41,7 +47,7 @@
     </div>
     <div class="card mt-3">
         <div class="card-body d-flex justify-content-around">
-            <a th:href="@{/people/{id}(id=${currentUser.getPersonId()})}" class="btn btn-warning">MY ACCOUNT</a>
+            <a th:href="@{/people/{id}(id=${currentUser})}" class="btn btn-warning">MY ACCOUNT</a>
             <!-- Only for admins -->
             <div th:if="${isAdmin}">
                 <a th:href="@{/people}" class="btn btn-warning">List of People</a>

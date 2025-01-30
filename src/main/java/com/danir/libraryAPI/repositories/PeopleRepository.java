@@ -13,4 +13,7 @@ public interface PeopleRepository extends JpaRepository<Person, Integer> {
     @Query("SELECT p FROM Person p WHERE LOWER(p.fullName) = LOWER(:fullName)")
     Optional<Person> findByFullNameIgnoreCase(@Param("fullName") String fullName);
     Optional<Person> findByEmail(String email);
+    @Query("SELECT p FROM Person p LEFT JOIN FETCH p.bookList WHERE p.personId = :id")
+    Optional<Person> findByIdWithBooks(@Param("id") int id);
+
 }

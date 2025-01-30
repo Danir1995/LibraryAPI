@@ -1,12 +1,16 @@
 package com.danir.libraryAPI.dto;
+import com.danir.libraryAPI.models.Book;
 import com.danir.libraryAPI.models.Role;
 import jakarta.validation.constraints.*;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Data
+@AllArgsConstructor
 public class PersonDTO {
 
     @Size(min = 2, max = 32,message = "name must be between 2 and 32 characters")
@@ -22,7 +26,11 @@ public class PersonDTO {
     @NotBlank(message = "Email is required")
     private String email;
 
-    private Set<Role> roles = new HashSet<>();
+    private List<Book> bookList;
+
+    private Set<Role> roles;
 
     private String password;
+
+
 }

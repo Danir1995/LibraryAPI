@@ -49,8 +49,17 @@ public class Book {
     @Column
     private boolean isOverdue;
 
+    @Column
+    private OffsetDateTime paymentDate;
+
     @OneToMany(mappedBy = "book", cascade = CascadeType.ALL)
     private List<BorrowedBook> borrowHistory;
+
+    @Column(nullable = false, columnDefinition = "double default 0.0")
+    private Double debt = 0.0;
+
+    @Column
+    private Boolean isDebtPaid;
 
     public Book() {
     }

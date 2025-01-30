@@ -4,6 +4,7 @@ import com.danir.libraryAPI.dto.PersonDTO;
 import com.danir.libraryAPI.models.BorrowedBook;
 import com.danir.libraryAPI.models.Person;
 import com.danir.libraryAPI.models.Role;
+import com.danir.libraryAPI.services.BookService;
 import com.danir.libraryAPI.services.BorrowedBookService;
 import com.danir.libraryAPI.services.PeopleService;
 import com.danir.libraryAPI.util.PeopleValidator;
@@ -18,7 +19,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.security.Principal;
-import java.util.List;
+import java.util.Set;
 
 import static com.danir.libraryAPI.controllers.BooksController.hasRole;
 
@@ -32,18 +33,24 @@ public class PeopleController {
     private final PeopleValidator validator;
     private final BorrowedBookService borrowedBookService;
     private final ModelMapper modelMapper;
+    private final BookService bookService;
 
-    public PeopleController(PeopleService peopleService, PeopleValidator validator, BorrowedBookService borrowedBookService, ModelMapper modelMapper) {
+    public PeopleController(PeopleService peopleService, PeopleValidator validator, BorrowedBookService borrowedBookService, ModelMapper modelMapper, BookService bookService) {
         this.peopleService = peopleService;
         this.validator = validator;
         this.borrowedBookService = borrowedBookService;
         this.modelMapper = modelMapper;
+        this.bookService = bookService;
     }
 
     @GetMapping("")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public String index(Model model){
+    public String index(Model model, Principal principal){
+        String userName = principal.getName();
+        Person person = peopleService.findByUsername(userName);
+
         model.addAttribute("people", peopleService.findAll());
+        model.addAttribute("currentUser", person.getPersonId());
         return "people/index";
     }
 
@@ -51,12 +58,16 @@ public class PeopleController {
     public String show(@PathVariable("id") int id, Model model) {
         boolean isAdmin = hasRole();
         Person person = peopleService.findOne(id);
-        List<BorrowedBook> borrowedBooks = borrowedBookService.findByPerson(person);
+        person.getBookList().forEach(book -> book.setDebt(bookService.calculateDebt(book)));
+        double totalDebt = bookService.calculateTotalDebt(person);
+        Set<BorrowedBook> borrowedBooks = borrowedBookService.findByPerson(person);
 
         model.addAttribute("isAdmin", isAdmin);
         model.addAttribute("thisUserIsAdmin", person.getRoles().contains(Role.ROLE_ADMIN));
         model.addAttribute("person", person);
         model.addAttribute("bookList", person.getBookList());
+        model.addAttribute("reservedBookList", person.getReservedBooks());
+        model.addAttribute("totalDebt", totalDebt);
         model.addAttribute("borrowedBeforeBooks", borrowedBooks);
         return "people/show";
     }
@@ -96,7 +107,7 @@ public class PeopleController {
         Person person = peopleService.findOne(id);
         boolean isSelf = person.getFullName().equals(principal.getName());
 
-        model.addAttribute("person", peopleService.findOne(id));
+        model.addAttribute("person", person);
         model.addAttribute("isSelf", isSelf);
         return "people/edit";
     }
