@@ -161,6 +161,7 @@ public class PaymentService {
         book.setDebt(0.0);
         book.setIsDebtPaid(true);
         book.setPaymentDate(OffsetDateTime.now());
+        book.setBorrowedDate(OffsetDateTime.now());
         bookService.save(book);
         logger.info("Book '{}' marked as paid successfully.", book.getName());
     }
