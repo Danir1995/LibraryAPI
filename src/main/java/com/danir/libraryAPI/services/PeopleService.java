@@ -6,6 +6,7 @@ import com.danir.libraryAPI.models.Role;
 import com.danir.libraryAPI.repositories.BookRepository;
 import com.danir.libraryAPI.repositories.PeopleRepository;
 import jakarta.persistence.EntityNotFoundException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -17,6 +18,7 @@ import java.util.Optional;
 
 @Service
 @Transactional(readOnly = true)
+@Slf4j
 public class PeopleService {
 
     private final PeopleRepository peopleRepository;
@@ -30,70 +32,78 @@ public class PeopleService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    public List<Person> findAll(){
+    public List<Person> findAll() {
+        log.info("Fetching all people from the database");
         return peopleRepository.findAll();
     }
 
-    public Person findOne(int id){
+    public Person findOne(int id) {
+        log.info("Fetching person with id: {}", id);
         Optional<Person> person = peopleRepository.findById(id);
         return person.orElse(null);
     }
 
     public Person findByUsername(String username) {
+        log.info("Searching for user by username: {}", username);
         return peopleRepository.findByFullNameIgnoreCase(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
+                .orElseThrow(() -> {
+                    log.warn("User not found with username: {}", username);
+                    return new UsernameNotFoundException("User not found with username: " + username);
+                });
     }
 
     @Transactional
-    public void save(Person person){
+    public void save(Person person) {
+        log.info("Saving new person with username: {}", person.getFullName());
         person.setPassword(passwordEncoder.encode(person.getPassword()));
-        if (!person.getRoles().contains(Role.ROLE_USER)) {
-            person.getRoles().add(Role.ROLE_USER);
-        }
+        person.getRoles().add(Role.ROLE_USER);
         peopleRepository.save(person);
+        log.info("Person saved successfully: {}", person.getFullName());
     }
 
     @Transactional
-    public void update(int id, Person person){
+    public void update(int id, Person person) {
+        log.info("Updating person with id: {}", id);
         person.setPersonId(id);
         Person existingPerson = peopleRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Person not found"));
 
-        // If password didn't change
         if (person.getPassword() == null || person.getPassword().isEmpty() || person.getPassword().equals(existingPerson.getPassword())) {
             person.setPassword(existingPerson.getPassword());
         } else {
-            //if password changed - encrypt it
             person.setPassword(passwordEncoder.encode(person.getPassword()));
         }
 
-        //copy role from existing object if it didn't change
         if (person.getRoles() == null || person.getRoles().isEmpty()) {
             person.setRoles(existingPerson.getRoles());
         }
 
         peopleRepository.save(person);
+        log.info("Person updated successfully: {}", id);
     }
 
     @Transactional
-    public void delete(int id){
+    public void delete(int id) {
+        log.info("Deleting person with id: {}", id);
         Person person = peopleRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Person not found"));
 
         for (Book book : person.getReservedBooks()) {
             book.setReservedBy(null);
-            bookRepository.save(book); // save changes
+            bookRepository.save(book);
         }
 
         peopleRepository.deleteById(id);
+        log.info("Person deleted successfully: {}", id);
     }
 
     public Optional<Person> show(String fullName) {
-       return peopleRepository.findByFullNameIgnoreCase(fullName);
+        log.info("Fetching person by full name: {}", fullName);
+        return peopleRepository.findByFullNameIgnoreCase(fullName);
     }
 
     public boolean emailExists(String email) {
+        log.info("Checking if email exists: {}", email);
         return peopleRepository.findByEmail(email).isPresent();
     }
-
 }

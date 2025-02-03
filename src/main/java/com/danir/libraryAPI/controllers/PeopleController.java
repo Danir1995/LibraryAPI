@@ -51,7 +51,7 @@ public class PeopleController {
 
         model.addAttribute("people", peopleService.findAll());
         model.addAttribute("currentUser", person.getPersonId());
-        return "people/index";
+        return "people/peopleIndex";
     }
 
     @GetMapping("/{id}")
@@ -109,14 +109,14 @@ public class PeopleController {
 
         model.addAttribute("person", person);
         model.addAttribute("isSelf", isSelf);
-        return "people/edit";
+        return "people/personEdit";
     }
 
     @PatchMapping("/{id}")
     public String update(@ModelAttribute("person") @Valid PersonDTO personDTO, BindingResult result,
                          @PathVariable("id") int id){
         if (result.hasErrors()){
-            return "people/edit";
+            return "people/personEdit";
         }
 
         Person person = peopleService.findOne(id);
@@ -136,7 +136,7 @@ public class PeopleController {
         ) {
 
             result.rejectValue("password", "error.person", "Password must be at least 6 characters long");
-            return "people/edit";
+            return "people/personEdit";
         }
 
         peopleService.update(id, convertToPerson(personDTO));

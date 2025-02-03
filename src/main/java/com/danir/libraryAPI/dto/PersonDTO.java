@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Set;
 
 @Data
-@AllArgsConstructor
 public class PersonDTO {
 
     @Size(min = 2, max = 32,message = "name must be between 2 and 32 characters")
@@ -28,9 +27,11 @@ public class PersonDTO {
 
     private List<Book> bookList;
 
-    private Set<Role> roles;
+    private Set<Role> roles = new HashSet<>();
 
     private String password;
+
+
 
 
 }
