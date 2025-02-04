@@ -27,13 +27,25 @@ public class NotificationService {
 
     public void notifyBookReleased(Book book) {
         if (book.getReservedBy() != null) {
-            String email = book.getReservedBy().getEmail();
-            String fullName = book.getReservedBy().getFullName();
-            String subject = "The book: " + book.getName() + " is free";
-            String message = "Hello, dear " + fullName + ". The book '" + book.getName() + "', reserved by you, is now free.";
+            try {
+                String email = book.getReservedBy().getEmail();
+                String fullName = book.getReservedBy().getFullName();
 
-            NotificationMessage notificationMessage = new NotificationMessage(email, subject, message);
-            notificationPublisher.sendOverdueNotification(notificationMessage);
+                if (email == null || fullName == null) {
+                    log.warn("Email or fullName is null for reserved book: {}", book.getName());
+                    return;
+                }
+
+                String subject = String.format("The book: %s is free", book.getName());
+                String message = String.format("Hello, dear %s. The book '%s', reserved by you, is now free.",
+                        fullName, book.getName());
+
+                NotificationMessage notificationMessage = new NotificationMessage(email, subject, message);
+                notificationPublisher.sendOverdueNotification(notificationMessage);
+                log.info("Notification passed to notificationPublisher for overdue book: {}", book.getName());
+            } catch (Exception e){
+                log.error("Failed to send notification for book: {}", book.getName(), e);
+            }
         }
     }
 
