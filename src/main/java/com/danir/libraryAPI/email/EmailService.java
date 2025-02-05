@@ -28,7 +28,7 @@ public class EmailService {
 
             mailSender.send(mailMessage);
 
-            log.info("✅ Email was sent to {}", toEmail);
+            log.info("✅ Email was sent successfully");
         } catch (Exception e) {
             log.error("❌ Error during sending email: {}", e.getMessage());
         }
