@@ -2,16 +2,16 @@ package com.danir.libraryAPI.services;
 import com.danir.libraryAPI.models.BorrowedBook;
 import com.danir.libraryAPI.models.Person;
 import com.danir.libraryAPI.repositories.BorrowedBookRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 
 @Service
 @Transactional(readOnly = true)
+@Slf4j
 public class BorrowedBookService {
 
     private final BorrowedBookRepository borrowedBookRepository;
@@ -21,29 +21,15 @@ public class BorrowedBookService {
         this.borrowedBookRepository = borrowedBookRepository;
     }
 
-    public List<BorrowedBook> findAll() {
-        return borrowedBookRepository.findAll();
-    }
-
-    public Optional<BorrowedBook> findById(long id) {
-        return borrowedBookRepository.findById(id);
-    }
-
     //receiving all borrowed books of person
     public Set<BorrowedBook> findByPerson(Person person) {
+        log.info("Fetching borrowed book by person : {}", person.getFullName());
         return borrowedBookRepository.findByPerson(person);
     }
 
     @Transactional
     public void save(BorrowedBook borrowedBook) {
+        log.info("Saving borrowed before book: {}, by person {}", borrowedBook, borrowedBook.getPerson());
         borrowedBookRepository.save(borrowedBook);
     }
-
-    @Transactional
-    public void deleteById(long id) {
-        borrowedBookRepository.deleteById((long) id);
-    }
-
-
 }
-
