@@ -103,7 +103,7 @@ public class PeopleService {
     }
 
     public boolean emailExists(String email) {
-        log.info("Checking if email exists: {}", email);
+        log.info("Checking if email exists");
         return peopleRepository.findByEmail(email).isPresent();
     }
 }

@@ -29,7 +29,7 @@ public class BorrowedBookService {
 
     @Transactional
     public void save(BorrowedBook borrowedBook) {
-        log.info("Saving borrowed before book: {}, by person {}", borrowedBook, borrowedBook.getPerson());
+        log.info("Saving borrowed before book");
         borrowedBookRepository.save(borrowedBook);
     }
 }
