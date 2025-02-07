@@ -52,7 +52,6 @@ public class Person implements UserDetails {
     @OneToMany(mappedBy = "reservedBy")
     private List<Book> reservedBooks;
 
-
     public Person() {
     }
 
