@@ -64,21 +64,19 @@ public class PeopleService {
     @Transactional
     public void update(int id, Person person) {
         log.info("Updating person with id: {}", id);
-        person.setPersonId(id);
+
         Person existingPerson = peopleRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Person not found"));
 
-        if (person.getPassword() == null || person.getPassword().isEmpty() || person.getPassword().equals(existingPerson.getPassword())) {
-            person.setPassword(existingPerson.getPassword());
-        } else {
-            person.setPassword(passwordEncoder.encode(person.getPassword()));
+        if (person.getPassword() != null && !person.getPassword().isEmpty() && !person.getPassword().equals(existingPerson.getPassword())) {
+            existingPerson.setPassword(passwordEncoder.encode(person.getPassword()));
         }
 
-        if (person.getRoles() == null || person.getRoles().isEmpty()) {
-            person.setRoles(existingPerson.getRoles());
+        if (person.getRoles() != null && !person.getRoles().isEmpty()) {
+            existingPerson.setRoles(person.getRoles());
         }
 
-        peopleRepository.save(person);
+        peopleRepository.save(existingPerson);
         log.info("Person updated successfully: {}", id);
     }
 
@@ -87,10 +85,11 @@ public class PeopleService {
         log.info("Deleting person with id: {}", id);
         Person person = peopleRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Person not found"));
-
-        for (Book book : person.getReservedBooks()) {
-            book.setReservedBy(null);
-            bookRepository.save(book);
+        if (person.getReservedBooks() != null) {
+            for (Book book : person.getReservedBooks()) {
+                book.setReservedBy(null);
+                bookRepository.save(book);
+            }
         }
 
         peopleRepository.deleteById(id);
