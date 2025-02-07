@@ -188,10 +188,20 @@ public class BookService {
         return bookDTO;
     }
 
-    @Scheduled(cron = "0 1 0 * * ?")
+    @Scheduled(cron = "0 0 0 * * ?")
     @Transactional
     public void updateOverdueBooks() {
         log.info("Updating overdue books");
+
+        List<Book> books = bookRepository.findAll()
+                .stream()
+                .filter(book -> book.getBorrowedDate() != null)
+                .toList();
+
+        for (Book book: books) {
+            book.setDebt(calculateDebt(book));
+        }
+
         bookRepository.updateOverdueBooks();
     }
 
