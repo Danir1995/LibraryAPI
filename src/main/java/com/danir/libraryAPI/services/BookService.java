@@ -139,10 +139,10 @@ public class BookService {
     @Transactional
     public String reserveBook(int bookId, int personId) {
         log.info("Reserving book ID {} for person ID {}", bookId, personId);
-        Book book = bookRepository.findById(bookId)
-                .orElseThrow(() -> new IllegalArgumentException("Book not found"));
+        Book book = findBookById(bookId);
 
         if (book.getReservedBy() != null) {
+            log.error("Book is already reserved");
             return "Book is already reserved";
         }
 
@@ -152,15 +152,14 @@ public class BookService {
         book.setReservedBy(person);
         bookRepository.save(book);
 
+        log.info("Reserved book successfully for person with id: {}", personId);
         return null;
     }
 
     @Transactional
     public void cancelReservation(int bookId) {
         log.info("Canceling reservation for book ID: {}", bookId);
-        Book book = bookRepository.findById(bookId)
-                .orElseThrow(() -> new IllegalArgumentException("Book not found"));
-
+        Book book = findBookById(bookId);
         book.setReservedBy(null);
 
         bookRepository.save(book);
@@ -244,6 +243,11 @@ public class BookService {
         return person.getBookList().stream()
                 .mapToDouble(this::calculateDebt)
                 .sum();
+    }
+
+    private Book findBookById(int bookId) {
+        return bookRepository.findById(bookId)
+                .orElseThrow(() -> new IllegalArgumentException("Book not found"));
     }
 
     public Book convertToBook(BookDTO bookDTO) {
