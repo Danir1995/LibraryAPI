@@ -6,10 +6,7 @@ import lombok.Data;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Entity
 @Table(name = "person")
@@ -44,13 +41,13 @@ public class Person implements UserDetails {
     private String password;
 
     @OneToMany(mappedBy = "person", fetch = FetchType.LAZY)
-    private List<Book> bookList;
+    private List<Book> bookList = new ArrayList<>();
 
     @OneToMany(mappedBy = "person", cascade = CascadeType.ALL)
-    private List<BorrowedBook> borrowedBeforeBooks;
+    private List<BorrowedBook> borrowedBeforeBooks = new ArrayList<>();
 
     @OneToMany(mappedBy = "reservedBy")
-    private List<Book> reservedBooks;
+    private List<Book> reservedBooks = new ArrayList<>();
 
     public Person() {
     }

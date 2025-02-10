@@ -214,6 +214,7 @@ public class BookService {
     public double calculateDebt(Book book) {
         log.info("Calculating debt for book: {}", book.getName());
         if (book.getIsDebtPaid() == null){
+            log.info("No debt for the book: '{}'", book.getName());
             return 0.0;
         }
 
@@ -234,15 +235,18 @@ public class BookService {
                 ? 10 + (overdueDays - 10) * 5.0
                 : overdueDays * 1.0;
         book.setDebt(amount);
-
+        log.info("Debt counted for the book: '{}', it is = {} euro", book.getName(), book.getDebt());
         return amount;
     }
 
     @Transactional
     public double calculateTotalDebt(Person person) {
-        return person.getBookList().stream()
+        double totalDebt =  person.getBookList().stream()
                 .mapToDouble(this::calculateDebt)
                 .sum();
+
+        log.info("Total person's debt is: {} euro", totalDebt);
+        return totalDebt;
     }
 
     private Book findBookById(int bookId) {
