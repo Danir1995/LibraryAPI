@@ -30,6 +30,12 @@ public class BookServiceTest {
     @Mock
     private PeopleRepository peopleRepository;
 
+    @Mock
+    private BorrowedBookService borrowedBookService;
+
+    @Mock
+    private NotificationService notificationService;
+
     @InjectMocks
     private BookService bookService;
 
@@ -104,7 +110,7 @@ public class BookServiceTest {
 
         assertNull(book.getPerson(),"Book's person should be null after release");
         assertNull(book.getBorrowedDate());
-        assertEquals(person.getBorrowedBeforeBooks().get(0).getBook().getName(), "Test Book");
+        assertEquals("Test Book", person.getBorrowedBeforeBooks().get(0).getBook().getName());
     }
 
     @Test
@@ -126,7 +132,7 @@ public class BookServiceTest {
 
         bookService.reserveBook(1, 1);
 
-        assertEquals(book.getReservedBy(), person);
+        assertEquals(person, book.getReservedBy());
         verify(bookRepository, times(1)).save(book);
     }
 
