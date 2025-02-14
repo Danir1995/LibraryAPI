@@ -1,30 +1,28 @@
 spring:
   datasource:
-    url: jdbc:postgresql://db:5432/project1
-    username: postgres
-    password: <your-database-password>
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
+
   rabbitmq:
-    host: rabbitmq
+    host: localhost
     port: 5672
-    username: guest
-    password: <your-rabbitmq-password>
-    exchange: overdue_books_exchange
-    routing-key: book.overdue
-  jpa:
-    hibernate:
-      ddl-auto: update
-      dialect: org.hibernate.dialect.PostgreSQLDialect
-      show_sql: true  # Enable for development only, consider disabling for production
+    username: ${RABBITMQ_USERNAME}
+    password: ${RABBITMQ_PASSWORD}
+    exchange: ${RABBITMQ_EXCHANGE}
+    routing-key: ${RABBITMQ_ROUTING_KEY}
+
   mail:
-    host: smtp.gmail.com
-    port: 587
-    username: <your-email>
-    password: <your-email-password>  # Use environment variables for better security
+    host: ${MAIL_HOST}
+    port: ${MAIL_PORT }
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
     properties:
       mail.smtp.auth: true
       mail.smtp.starttls.enable: true
-  mvc:
-    hiddenmethod:
-      filter:
-        enabled: true
+
+stripe:
+  publishable-key: ${STRIPE_PUBLISHABLE_KEY}
+  secret-key: ${STRIPE_SECRET_KEY}
+  currency: ${STRIPE_CURRENCY}

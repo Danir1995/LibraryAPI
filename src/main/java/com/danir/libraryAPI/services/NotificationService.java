@@ -41,7 +41,7 @@ public class NotificationService {
                         fullName, book.getName());
 
                 NotificationMessage notificationMessage = new NotificationMessage(email, subject, message);
-                notificationPublisher.sendOverdueNotification(notificationMessage);
+                notificationPublisher.sendNotification(notificationMessage);
                 log.info("Notification passed to notificationPublisher for book: {}", book.getName());
             } catch (Exception e){
                 log.error("Failed to send notification for book: {}", book.getName(), e);
@@ -66,7 +66,7 @@ public class NotificationService {
                         String message = String.format("Hello, dear %s. You have an overdue book: '%s'. From today a fee will be 5 euro/day", fullName, book.getName());
 
                         NotificationMessage notificationMessage = new NotificationMessage(email, subject, message);
-                        notificationPublisher.sendOverdueNotification(notificationMessage);
+                        notificationPublisher.sendNotification(notificationMessage);
 
                         log.info("Notification sent to RabbitMQ for overdue book: {}", book.getName());
                     } catch (Exception e) {

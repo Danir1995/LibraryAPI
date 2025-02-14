@@ -135,7 +135,7 @@ public class PaymentService {
         return PaymentIntent.create(params).getClientSecret();
     }
 
-    private void verifyPayment(String paymentIntentId) throws StripeException {
+   void verifyPayment(String paymentIntentId) throws StripeException {
         log.debug("Verifying payment with ID: {}", paymentIntentId);
         PaymentIntent paymentIntent = PaymentIntent.retrieve(paymentIntentId);
         if (!"succeeded".equals(paymentIntent.getStatus())) {

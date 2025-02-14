@@ -14,7 +14,7 @@ public class NotificationPublisher {
         this.rabbitTemplate = rabbitTemplate;
     }
 
-    public void sendOverdueNotification(NotificationMessage message) {
+    public void sendNotification(NotificationMessage message) {
         rabbitTemplate.convertAndSend(
                 RabbitMQConfig.EXCHANGE_NAME,
                 RabbitMQConfig.ROUTING_KEY,
