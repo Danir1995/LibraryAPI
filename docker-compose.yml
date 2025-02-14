@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  app:
+    image: openjdk:17
+    container_name: java_backend_app
+    build: .
+    ports:
+      - "8081:8080"
+    env_file:
+      - .env
+    volumes:
+      - .:/usr/src/app
+    networks:
+      - backend
+
+  db:
+    image: postgres:latest
+    container_name: localhost
+    ports:
+      - "5432:5432"
+    env_file:
+      - .env
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - backend
+
+  rabbitmq:
+    image: rabbitmq:management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    env_file:
+      - .env
+    networks:
+      - backend
+
+networks:
+  backend:
+
+volumes:
+  postgres_data:
