@@ -39,22 +39,6 @@
                 </form>
             </div>
 
-            <div th:if="${!isReserved}" class="mb-4">
-                <h5>Reserve for User</h5>
-                <form th:method="POST" th:action="@{/books/{bookId}/reserve(bookId=${book.getBookId()})}">
-                    <div class="mb-3">
-                        <label for="personId" class="form-label">Reserve for:</label>
-                        <select id="personId" name="personId" class="form-select" required>
-                            <option value="" disabled selected>Choose person</option>
-                            <option th:each="person : ${people}"
-                                    th:value="${person.personId}"
-                                    th:text="${person.getFullName()}"></option>
-                        </select>
-                    </div>
-                    <button type="submit" class="btn btn-warning">Reserve Book</button>
-                </form>
-            </div>
-
             <div th:if="${!isOccupied}" class="mb-4">
                 <h5>Assign Book</h5>
                 <p class="text-success">This book is available.</p>
@@ -70,6 +54,23 @@
                     </div>
                     <input type="hidden" name="bookId" th:value="${book.getBookId()}">
                     <button type="submit" class="btn btn-primary">Assign Book</button>
+                </form>
+            </div>
+
+            <div th:if="${!isReserved}"  class="mb-4">
+                <h5>Reserve for User</h5>
+                <form th:method="POST" th:action="@{/books/{bookId}/reserve(bookId=${book.getBookId()})}">
+                    <div class="mb-3">
+                        <label for="personId" class="form-label">Reserve for:</label>
+                        <select id="personId" name="personId" class="form-select" required>
+                            <option value="" disabled selected>Choose person</option>
+                            <option th:each="person : ${people}"
+                                    th:if="${person.getFullName() != book.getPerson_name()}"
+                                    th:value="${person.personId}"
+                                    th:text="${person.getFullName()}"></option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-warning">Reserve Book</button>
                 </form>
             </div>
 

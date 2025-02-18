@@ -160,6 +160,15 @@ public class PeopleController {
         return "redirect:/people/" + id;
     }
 
+    @DeleteMapping("/{personId}/{bookId}/cancel-reservation-person")
+    public String cancelReservation(@PathVariable int bookId, @PathVariable int personId, Model model) {
+        log.info("Attempting to cancel reservation for book with ID: {}", bookId);
+        bookService.cancelReservation(bookId);
+        log.info("Reservation cancelled successfully for book with ID: {}", bookId);
+        model.addAttribute("message", "Reservation cancelled successfully");
+        return "redirect:/people/" + personId;
+    }
+
     @DeleteMapping("/{id}")
     public String delete(@PathVariable("id") int id, RedirectAttributes redirectAttributes) {
         Person person = peopleService.findOne(id);

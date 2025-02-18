@@ -71,38 +71,53 @@
             </div>
 
             <!-- If person has books -->
-            <div th:if="${!bookList.isEmpty()}">
-                <h5>Books taken by user:</h5>
-                <ul class="list-group">
-                    <li class="list-group-item d-flex justify-content-between align-items-center"
-                        th:each="book : ${person.getBookList()}"
-                        th:style="${book.isOverdue() ? 'color: red;' : ''}">
-                        <span th:text="${book.getName() + ', ' + book.getAuthor() + ', ' + book.getYear()}"></span>
-                        <div th:if="${isAdmin}">
-                            <form th:method="POST" th:action="@{/books/release}" class="release-book-form">
-                                <input type="hidden" name="bookId" th:value="${book.getBookId()}">
-                                <button type="button" class="btn btn-warning btn-sm return-book-button">Return book</button>
-                            </form>
-                        </div>
-                        <div th:if="${book.getDebt() > 0.0}">
-                        <span>
-                            Payment required: €<span th:text="${book.getDebt()}"></span>
-                            <a th:href="@{/payment/{bookId}(bookId=${book.bookId})}" class="btn btn-primary">Pay</a>
-                            <br>
-                            <small class="text-muted">Pay only when you want to return the book (24-hour rule).</small>
-                        </span>
-                        </div>
-                    </li>
-                </ul>
+            <div th:if="${!bookList.isEmpty()}" class="card border-success mb-3">
+                <div class="card-header bg-success text-white">
+                    <h5>Books taken by user:</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group">
+                        <li class="list-group-item d-flex justify-content-between align-items-center"
+                            th:each="book : ${person.getBookList()}"
+                            th:style="${book.isOverdue() ? 'color: red;' : ''}">
+                            <span th:text="${book.getName() + ', ' + book.getAuthor() + ', ' + book.getYear()}"></span>
+                            <div th:if="${isAdmin}">
+                                <form th:method="POST" th:action="@{/books/release}" class="release-book-form">
+                                    <input type="hidden" name="bookId" th:value="${book.getBookId()}">
+                                    <button type="button" class="btn btn-warning btn-sm return-book-button">Return book</button>
+                                </form>
+                            </div>
+                            <div th:if="${book.getDebt() > 0.0}">
+                    <span>
+                        Payment required: €<span th:text="${book.getDebt()}"></span>
+                        <a th:href="@{/payment/{bookId}(bookId=${book.bookId})}" class="btn btn-primary">Pay</a>
+                        <br>
+                        <small class="text-muted">Pay only when you want to return the book (24-hour rule).</small>
+                    </span>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
             </div>
 
-            <div th:if="${!reservedBookList.isEmpty()}">
-                <h5>Books reserved by user:</h5>
-                <li class="list-group-item d-flex justify-content-between align-items-center"
-                    th:each="book : ${person.getReservedBooks()}">
-                    <span th:text="${book.getName() + ', ' + book.getAuthor() + ', ' + book.getYear()}"></span>
-                </li>
+
+            <div th:if="${!reservedBookList.isEmpty()}" class="card border-primary mb-3">
+                <div class="card-header bg-primary text-white">
+                    <h5>Books reserved by user:</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group">
+                        <li class="list-group-item d-flex justify-content-between align-items-center"
+                            th:each="book : ${person.getReservedBooks()}">
+                            <span th:text="${book.getName() + ', ' + book.getAuthor() + ', ' + book.getYear()}"></span>
+                            <form th:method="DELETE" th:action="@{/people/{personId}/{bookId}/cancel-reservation-person(personId=${person.getPersonId()}, bookId=${book.getBookId()})}">
+                                <button type="submit" class="btn btn-secondary">Cancel Reservation</button>
+                            </form>
+                        </li>
+                    </ul>
+                </div>
             </div>
+
 
             <!-- Borrowed book history -->
             <div th:if="${!borrowedBeforeBooks.isEmpty()}">

@@ -171,6 +171,10 @@ public class BooksController {
         Book book = bookService.findOne(bookId);
         bookService.savePersonWithBook(person, book);
 
+        if (book.getReservedBy() != null && book.getReservedBy().getPersonId() == personId) {
+            bookService.cancelReservation(bookId);
+        }
+
         log.info("Book assigned successfully. Book ID: {}, Person ID: {}", bookId, personId);
         return "redirect:/books/" + bookId;
     }
