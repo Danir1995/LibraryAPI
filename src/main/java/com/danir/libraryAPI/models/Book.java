@@ -1,5 +1,6 @@
 package com.danir.libraryAPI.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -38,11 +39,11 @@ public class Book {
     @Column(name = "borrowed_date")
     private OffsetDateTime borrowedDate;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "person_id")
     private Person person;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "reserved_by_id")
     private Person reservedBy;
 
@@ -52,7 +53,8 @@ public class Book {
     @Column
     private OffsetDateTime paymentDate;
 
-    @OneToMany(mappedBy = "book", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "book", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnore
     private List<BorrowedBook> borrowHistory;
 
     @Column(nullable = false, columnDefinition = "double default 0.0")
